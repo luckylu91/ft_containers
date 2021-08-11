@@ -88,4 +88,10 @@ void test_methods(InputIterator it) {
 }
 
 int main() {
+  ft::vector<int> intVect;
+  for (int i = 0; i < 10; i++)
+    intVect.push_back(i);
+
+  test_types();
+  test_methods(intVect.begin());
 }
