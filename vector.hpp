@@ -236,11 +236,11 @@ class vector {
       return old_value;
     }
     value_type &operator[](int i) { return *(_ptr + i); }
-    iterator &operator+=(difference_type delta) const {
+    iterator &operator+=(difference_type delta) {
       _ptr += delta;
       return *this;
     }
-    iterator &operator-=(difference_type delta) const {
+    iterator &operator-=(difference_type delta) {
       _ptr -= delta;
       return *this;
     }
@@ -295,11 +295,11 @@ class vector {
       return old_value;
     }
     value_type &operator[](int i) { return *(_ptr + i); }
-    const_iterator &operator+=(difference_type delta) const {
+    const_iterator &operator+=(difference_type delta) {
       _ptr += delta;
       return *this;
     }
-    const_iterator &operator-=(difference_type delta) const {
+    const_iterator &operator-=(difference_type delta) {
       _ptr -= delta;
       return *this;
     }

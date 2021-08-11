@@ -51,26 +51,21 @@ void test_types() {
 // Require size >= 5
 template <class InputIterator>
 void test_methods(InputIterator it) {
-  typedef typename InputIterator::difference_type difference_type;
-  typedef typename InputIterator::value_type value_type;
-  typedef typename InputIterator::pointer pointer;
-  typedef typename InputIterator::reference reference;
-
   std::cout << "*it = " << *it<< std::endl;
   // operator++
-  std::cout << "++it = " << ++it << ", now *it = " << *it << std::endl;
+  std::cout << "++it = " << *(++it) << ", now *it = " << *it << std::endl;
   // operator++(int)
-  std::cout << "it++ = " << it++ << ", now *it = " << *it << std::endl;
+  std::cout << "it++ = " << *(it++) << ", now *it = " << *it << std::endl;
   // operator--
-  std::cout << "--it = " << --it << ", now *it = " << *it << std::endl;
+  std::cout << "--it = " << *(--it) << ", now *it = " << *it << std::endl;
   // operator--
-  std::cout << "it-- = " << it-- << ", now *it = " << *it << std::endl;
+  std::cout << "it-- = " << *(it--) << ", now *it = " << *it << std::endl;
   // operator[]
-  std::cout << "it[0]" << it[0] << ", it[2]" << it[2] << std::endl;
+  std::cout << "it[0] = " << it[0] << ", it[2] = " << it[2] << std::endl;
   // operator+=
-  std::cout << "it += 2" << ", now *it = " << *it << std::endl;
+  std::cout << "it += 2, now *it = " << *(it += 2) << std::endl;
   // operator-=
-  std::cout << "it -= 1" << ", now *it = " << *it << std::endl;
+  std::cout << "it -= 1, now *it = " << *(it -= 1) << std::endl;
   // operator-
   std::cout << "*(it - 1) = " << *(it - 1) << std::endl;
   // operator+
@@ -78,7 +73,8 @@ void test_methods(InputIterator it) {
   // operator+
   std::cout << "*(1 + it) = " << *(1 + it) << std::endl;
   // operator-
-  std::cout << "*(it - (it + 2)) = " << *(it - (it + 2)) << std::endl;
+  std::cout << "*(it - (it + 2)) = " << it - (it + 2) << std::endl;
+  std::cout << "*(it - (it - 1)) = " << it - (it - 1) << std::endl;
   // operator==
   // operator!=
   // operator<
