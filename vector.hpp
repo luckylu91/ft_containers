@@ -6,9 +6,13 @@
 #include <stdexcept>
 #include <algorithm>
 
+//
+#include <iostream>
+
 #define MIN_CAPACITY 5
 #define RESIZE_MARGIN 10
 #define RESERVE_MARGIN 10
+#define ASSIGN_MARGIN 10
 
 namespace ft {
 
@@ -34,24 +38,22 @@ class vector {
 
   explicit vector(const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
-    _array = _allocator.allocate(MIN_CAPACITY);
+    _allocate(MIN_CAPACITY);
   }
 
   explicit vector(size_type n, const value_type &val = value_type(),
                   const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(n), _capacity(n), _allocator(alloc) {
-    _array = _allocator.allocate(n);
-    for (size_type i = 0; i < n; i++)
-      _allocator.construct(_array + i, val);
+    _allocate(n);
+    _construct(0, n, val);
   }
 
   template <class InputIterator>
   vector(InputIterator first, InputIterator last,
          const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
-    _array = _allocator.allocate(MIN_CAPACITY);
-    for (InputIterator it = first; it != last; ++it)
-      push_back(*it);
+    _allocate(MIN_CAPACITY);
+    _construct(first, last);
   }
 
   vector(const vector &x) : _array(NULL), _size(x._size), _capacity(x._capacity), _allocator(x._allocator) {
@@ -130,28 +132,91 @@ class vector {
   // Modifiers
 
   //Assign vector content (public member function )
-  // assign
+  template <class InputIterator>
+      void assign (InputIterator first, InputIterator last) {
+    _destroy_from(0);
+    for (InputIterator it = first; it != last; ++it)
+      push_back(*it);
+  }
+  
+  void assign (size_type n, const value_type& val) {
+    _destroy_from(0);
+    if (n > _capacity)
+    {
+      _deallocate();
+      _allocate(n + ASSIGN_MARGIN);
+    }
+    else if (n < _capacity)
+      _destroy_from(n);
+    _construct(0, n, val);
+  }
 
   //Add element at the end (public member function )
   void push_back(const value_type &val) {
+    // _enlarge_if_full();
     if (_size == _capacity)
       _enlarge(_capacity * 2);
-    _array[_size++] = val;
+    _allocator.construct(_array + _size++, val);
   }
 
   //Delete last element (public member function )
   void pop_back() {
-    if (_size > 0) {
-      _allocator.destroy(_array + _size);
-      _size--;
-    }
+    if (_size > 0)
+      _destroy_at(_size);
   }
 
   //Insert elements (public member function )
-  // insert
+  iterator insert(iterator position, const value_type& val) {
+    if (position >= begin() && position < end())
+      insert(position, 1, val);
+  }
+
+  void insert(iterator position, size_type n, const value_type& val) {
+    _enlarge_if_full(n);
+    size_type start = static_cast<size_type>(position - begin());
+    size_type i = _size - 1 + n;
+    while (i >= _size || i >= start + n) {
+      _allocator.construct(_array + i, _array + i - n);
+      i--;
+    }
+    while (i >= start + n) {
+      *(_array + i) = *(_array + i - n);
+      i--;
+    }
+    while (i >= start) {
+      *(_array + i) = val;
+      i--;
+    }
+  }
+
+  template <class InputIterator>
+    void insert (iterator position, InputIterator first, InputIterator last) {
+      for (InputIterator it = first; it != last; ++it)
+        insert(position++, *it);
+  }
+
 
   //Erase elements (public member function )
-  // erase
+  iterator erase(iterator position) {
+    erase(position, position + 1);
+    return position;
+  }
+
+  iterator erase(iterator first, iterator last) {
+    if (first >= begin() && first < last && last < end())
+    {
+      iterator first_mov = first;
+      iterator last_mov = last;
+      while (last_mov != end())
+      {
+        *first_mov = *last_mov;
+        ++first_mov;
+        ++last_mov;
+      }
+      _destroy_from(first_mov - begin());
+    }
+    return first;
+  }
 
   //Swap content (public member function )
   void swap(vector &x) {
@@ -160,16 +225,10 @@ class vector {
 
   //Clear content (public member function )
   void clear() {
-    _destruct();
-    _array = _allocator.allocate(MIN_CAPACITY);
-    _capacity = MIN_CAPACITY;
+    _destroy_from(0);
+    _deallocate();
+    _allocate(MIN_CAPACITY);
   }
-
-  //Construct and insert element (public member function )
-  // emplace
-
-  //Construct and insert element at the end (public member function )
-  // emplace_back
 
   // Allocator
 
@@ -215,8 +274,8 @@ class vector {
       return *this;
     }
 
-    reference operator*() { return *_ptr; }
-    reference operator->() { return _ptr; }
+    reference operator*() const { return *_ptr; }
+    reference operator->() const { return _ptr; }
     iterator &operator++() {
       ++_ptr;
       return *this;
@@ -274,8 +333,8 @@ class vector {
       return *this;
     }
 
-    const_reference operator*() const { return *_ptr; }
-    const_reference operator->() const { return _ptr; }
+    reference operator*() const { return *_ptr; }
+    reference operator->() const { return _ptr; }
     const_iterator &operator++() {
       ++_ptr;
       return *this;
@@ -294,7 +353,7 @@ class vector {
       --_ptr;
       return old_value;
     }
-    value_type &operator[](int i) { return *(_ptr + i); }
+    reference operator[](int i) { return *(_ptr + i); }
     const_iterator &operator+=(difference_type delta) {
       _ptr += delta;
       return *this;
@@ -328,11 +387,37 @@ class vector {
   size_type _capacity;
   Alloc _allocator;
 
+  void _allocate(size_type new_capacity) {
+    _array = _allocator.allocate(new_capacity);
+    _capacity = new_capacity;
+    // _size = 0;
+  }
+
+  template <class InputIterator>
+      void _construct(InputIterator first, InputIterator last) {
+    for (InputIterator it = first; it != last; ++it)
+      push_back(*it);
+  }
+
+  void _construct(size_type start, size_type n, const value_type& val) {
+      for (size_type i = 0; i < n; i++)
+        _allocator.construct(_array + start + i, val);
+  }
+
+  void _destroy_at(size_type i) {
+    _allocator.destroy(_array + i);
+    _size--;
+  }
+
+  void _destroy_from(size_type start) {
+    for (size_type i = 0; i < _size - start; i++)
+      _allocator.destroy(_array + start + i);
+    _size = start;
+  }
+
   // DOUBT
   //
-  void _destruct() {
-    for (size_type i = 0; i < _size; i++)
-      _allocator.destroy(_array + i);
+  void _deallocate() {
     if (_array != NULL)
       _allocator.deallocate(_array, _capacity);
     _size = 0;
@@ -341,12 +426,11 @@ class vector {
   }
 
   void _copy(const vector<T, Alloc> &x) {
-    _destruct();
-    _array = _allocator.allocate(x._capacity);
-    for (size_type i = 0; i < x._size; i++)
-      _allocator.construct(_array + i, x[i]);
+    _destroy_from(0);
+    _deallocate();
+    _allocate(x._capacity);
+    _construct(x.begin(), x.end());
     _size = x._size;
-    _capacity = x._capacity;
   }
 
   void _enlarge(size_type new_capacity) {
@@ -355,10 +439,22 @@ class vector {
     if (_size > 0) {
       for (size_type i = 0; i < _size; i++)
         _allocator.construct(new_area + i, old_area[i]);
-      _allocator.deallocate(old_area, _capacity);
+      if (old_area != NULL) {
+        for (size_type i = 0; i < _size; i++)
+          _allocator.destroy(old_area + i);
+        _allocator.deallocate(old_area, _capacity);
+      }
     }
     _array = new_area;
     _capacity = new_capacity;
+  }
+
+  void _enlarge_if_full(size_type delta = 1) {
+      size_type new_capacity = _capacity;
+      while (_size + delta > new_capacity)
+        new_capacity *= 2;
+      if (new_capacity > _capacity)
+        _enlarge(new_capacity);
   }
 };
 

@@ -2,7 +2,7 @@
 
 #include "vector.hpp"
 
-void test_types() {
+void test_iterator_types() {
   ft::vector<int> intVect;
   for (int i = 0; i < 10; i++)
     intVect.push_back(i);
@@ -29,29 +29,11 @@ void test_types() {
   std::cout << "END" << std::endl;
 }
 
-// operator*
 // operator-> !
-// operator++
-// operator++(int)
-// operator--
-// operator--(int)
-// operator[]
-// operator+=
-// operator-=
-// operator-
-// operator+
-// operator+
-// operator-
-// operator==
-// operator!=
-// operator<
-// operator>
-// operator<=
-// operator>=
-// Require size >= 5
+// Require size >= 3
 template <class InputIterator>
-void test_methods(InputIterator it) {
-  std::cout << "*it = " << *it<< std::endl;
+void test_iterator_methods(InputIterator it) {
+  std::cout << "*it = " << *it << std::endl;
   // operator++
   std::cout << "++it = " << *(++it) << ", now *it = " << *it << std::endl;
   // operator++(int)
@@ -73,21 +55,39 @@ void test_methods(InputIterator it) {
   // operator+
   std::cout << "*(1 + it) = " << *(1 + it) << std::endl;
   // operator-
-  std::cout << "*(it - (it + 2)) = " << it - (it + 2) << std::endl;
-  std::cout << "*(it - (it - 1)) = " << it - (it - 1) << std::endl;
+  std::cout << "*(it - (it + 2)) = " << (it - (it + 2)) << std::endl;
+  std::cout << "*(it - (it - 1)) = " << (it - (it - 1)) << std::endl;
+  std::boolalpha(std::cout);
   // operator==
+  std::cout << "it == it : " << (it == it) << std::endl;
+  std::cout << "it == (it + 1) : " << (it == (it + 1)) << std::endl;
   // operator!=
+  std::cout << "it != (it + 1) : " << (it != (it + 1)) << std::endl;
+  std::cout << "it != it : " << (it != it) << std::endl;
   // operator<
+  std::cout << "it < it : " << (it < it) << std::endl;
+  std::cout << "it < (it + 1) : " << (it < (it + 1)) << std::endl;
   // operator>
+  std::cout << "it > it : " << (it > it) << std::endl;
+  std::cout << "it > (it - 1) : " << (it > (it - 1)) << std::endl;
   // operator<=
+  std::cout << "it <= it : " << (it <= it) << std::endl;
+  std::cout << "it <= (it + 1) : " << (it <= (it + 1)) << std::endl;
   // operator>=
+  std::cout << "it >= it : " << (it >= it) << std::endl;
+  std::cout << "it >= (it - 1) : " << (it >= (it - 1)) << std::endl;
+  std::noboolalpha(std::cout);
 }
 
 int main() {
   ft::vector<int> intVect;
   for (int i = 0; i < 10; i++)
     intVect.push_back(i);
-
-  test_types();
-  test_methods(intVect.begin());
+  ft::vector<int> const cIntVect(intVect);
+  // test_iterator_types();
+  std::cout << "vector::iterator" << std::endl << std::endl;
+  test_iterator_methods(intVect.begin());
+  std::cout << std::endl;
+  std::cout << "vector::const_iterator" << std::endl << std::endl;
+  test_iterator_methods(cIntVect.begin());
 }
