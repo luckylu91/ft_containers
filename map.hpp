@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "pair.hpp"
 
 template < class T, class Alloc = std::allocator<T> >
 class BST {
