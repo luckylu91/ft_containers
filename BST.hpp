@@ -8,17 +8,14 @@
 template <class Value, class ValueCompare = std::less<Value>, class Alloc = std::allocator<Value> >
 class BST {
  public:
+  typedef Alloc allocator_type;
   typedef Value value_type;
   typedef ValueCompare value_compare;
 
-  BST() : root(NULL) {}
+  BST(allocator_type const & alloc = allocator_type()) : root(NULL), alloc(alloc) {}
 
-  void insert(value_type const & val) {
-    value_type *val_ptr = new value_type(val);
-    if (root == NULL)
-      root = new Node(val_ptr);
-    else
-      root->insert(val_ptr);
+  void insert(value_type const & new_val) {
+    this->root = Node::insert(this->root, new_val);
   }
 
   void _print() {
@@ -30,129 +27,111 @@ class BST {
  private:
   class Node {
    public:
-    Node(value_type *val) : _value(val), _parent(NULL), _comp(value_compare()), _height(0) { _child[0] = _child[1] = NULL; }
+    Node(value_type const &val, allocator_type const & alloc = allocator_type())
+      : value(NULL), left(NULL), right(NULL), comp(value_compare()), height(0), alloc(alloc) {
+        std::cout << "Node constructor OK" << std::endl;
+        this->value = this->alloc.allocate(1);
+        this->alloc.construct(this->value, val);
+    }
+
+    ~Node() {
+      alloc.destruct(this->value);
+      alloc.deallocate(this->value);
+    }
+
+    // void setChild(Node *n, int dir) {
+    //   this->_child[dir] = n;
+    //   if (n != NULL)
+    //     n->_parent = this;
+    // }
+
+    static Node *rotateLeft(Node *x) {
+      Node *y = x->right;
+      Node *yL = y->left;
+
+      x->right = yL;
+      y->left = x;
+
+      x->updateHeight();
+      y->updateHeight();
+      return y;
+    }
+
+    static Node *rotateRight(Node *y) {
+      Node *x = y->left;
+      Node *xR = x->right;
+
+      y->left = xR;
+      x->right = y;
+      
+      x->updateHeight();
+      y->updateHeight();
+      return x;
+    }
+
+    // returns the new root in stead of "p"
+    static Node *insert(Node *p, value_type const &new_val) {
+      std::cout << "Inserting " << new_val << std::endl;
+
+      if (p == NULL)
+        return new Node(new_val);
+      if (new_val < *p)
+        p->left = insert(p->left, new_val);
+      else if (*p < new_val)
+        p->right = insert(p->right, new_val);
+      else {
+        *p->value = new_val;
+        return p;
+      }
+
+      p->updateHeight();
+      // p->height = 1 + std::max(nodeHeight(p->left), nodeHeight(p->right));
+      int balance = p->getBalance();
+      // Left Left Case
+      if (balance > 1 && new_val < *p->left) {
+        std::cout << "Left Left Case" << std::endl;
+        return rotateLeft(p); }
+      // Left Right Case
+      else if (balance > 1 && new_val > *p->left) {
+        std::cout << "Left Right Case" << std::endl;
+        p->left = rotateLeft(p->left);
+        return rotateRight(p);
+      }
+      // Right Left Case
+      else if (balance < -1 && new_val < *p->right) {
+        std::cout << "Right Left Case" << std::endl;
+        p->right = rotateRight(p->right);
+        return rotateLeft(p);
+      }
+      // Right Right Case
+      else if (balance < -1 && new_val > *p->right) {
+        std::cout << "Right Right Case" << std::endl;
+        return rotateLeft(p); }
+      return p;
+    }
 
     Node *find(value_type const & val);
 
-    Node *rotateLeft(Node )
-    // void setChild(Node *N, int dir) {
-    //   this->child[dir] = N;
-    //   if (N != NULL) {
-    //     N->parent = this;
-    //   }
-    // }
+    static int nodeHeight(Node *n) {
+      if (n == NULL)
+        return 0;
+      return n->height;
+    }
 
-    // dir is left (i.e. 0) if this is the right child of its parent
-    // void rotate(int dir) {
-    //   int balance_update = 2 * dir - 1;
-    //   Node *P = this->parent;
+    int getBalance() {
+      return nodeHeight(this->left) - nodeHeight(this->right);
+    }
 
-    //   P->setChild(this->child[dir], 1-dir);
-    //   this->setChild(P, dir);
-    //   this->parent = P->parent;
-    //   // P->parent->child[] = this;
-    //   P->balance += balance_update;
-    //   this->balance += balance_update;
-    // }
-
-    // // This(left child of Parent) -(parent-right)-> P -(parent-left)-> Right Child
-    // void rotateRight() {
-    //   Node *P = this->parent;
-
-    //   P->setChild(this->child[1], 0);
-    //   P->balance += 1;
-    //   this->setChild(P, 1);
-    //   this->balance += 1;
-    // }
-
-    // // This(right child of Parent) -(parent-left)-> P -(parent-right)-> Left Child
-    // void rotateLeft() {
-    //   Node *P = this->parent;
-
-    //   P->setChild(this->child[0], 1);
-    //   P->balance -= 1;
-    //   this->setChild(P, 0);
-    //   this->balance -= 1;
-    // }
-
-    // void add(value_type *val) {
-    //   if (this->comp(*this->value, *val)) {
-    //     if (child[0] == NULL)
-    //       this->setChild(new Node(val), 0);
-    //     else {
-    //       child[0]->add(val);
-    //       this->balance -= 1;
-    //       if (this->balance == -2) {
-    //         child[0]->rotateRight();
-    //       }
-    //     }
-    //   }
-    //   else if (this->comp(*val, *this->value)) {
-    //     if (child[1] == NULL)
-    //       this->setChild(new Node(val), 1);
-    //     else {
-    //       child[1]->add(val);
-    //       this->balance += 1;
-    //       if (this->balance == 2) {
-    //         child[1]->rotateLeft();
-    //       }
-    //     }
-    //   }
-    //   else {
-    //     *value = *val;
-    //   }
-    // }
-
-    // bool insert(value_type *val) {
-    //   std::cout << "Inserting " << *val << " (Node " << *this->value << ")" << std::endl;
-    //   int balance_update;
-    //   int dir;
-    //   bool is_equal = true;
-
-    //   if (this->comp(*val, *this->value)) {
-    //     dir = 0;
-    //     balance_update = -1;
-    //     is_equal = false;
-    //   }
-    //   else if (this->comp(*this->value, *val)) {
-    //     dir = 1;
-    //     balance_update = 1;
-    //     is_equal = false;
-    //   }
-    //   if (is_equal) {
-    //     std::cout << "Is equal" << std::endl;
-    //     *this->value = *val;
-    //     return false;
-    //   }
-    //   else {
-    //     if (child[dir] == NULL)
-    //     {
-    //       std::cout << "Insertion to the " << (dir == 0 ? "left" : "right") << " of node " << *this->value << std::endl;
-    //       this->setChild(new Node(val), dir);
-    //       this->balance += balance_update;
-    //       return true;
-    //     }
-    //     bool balance_changed = child[dir]->insert(val);
-    //     if (balance_changed) {
-    //       std::cout << "New value affection balance" << std::endl;
-    //       this->balance += balance_update;
-    //       if (this->balance == -2 || this->balance == 2) {
-    //         std::cout << "Rotating node " << *child[dir]->value << " with arg " << 1-dir << std::endl;
-    //         std::cout << "node's parent : " << *child[dir]->parent->value << ", ";
-    //         std::cout << "as " << this->_parentSideStr() << " child" << std::endl;
-    //         child[dir]->rotate(1-dir);
-    //       }
-    //     }
-    //     return balance_changed;
-    //   }
-    // }
+    void updateHeight() {
+      this->height = 1 + std::max(nodeHeight(this->left), nodeHeight(this->right));
+    }
 
     void _print(int level) {
-      if (this->_child[0] != NULL)
-        this->_child[0]->_print(level + 1);
-      std::cout << *_value << " (" << level << "), ";
-      if (this->_child[1] != NULL)
-        this->_child[1]->_print(level + 1);
+      if (this->left != NULL)
+        this->left->_print(level + 1);
+      std::cout << *value << " (" << level << "), ";
+      if (this->right != NULL)
+        this->right->_print(level + 1);
     }
 
     // int _parentSide() {
@@ -175,13 +154,21 @@ class BST {
     //   }
     // }
 
+    friend bool operator<(Node const & a, value_type const & b) { return a.comp(*a.value, b); }
+    friend bool operator<(value_type const & a, Node const & b) { return b.comp(a, *b.value); }
+    friend bool operator>(Node const & a, value_type const & b) { return a.comp(b, *a.value); }
+    friend bool operator>(value_type const & a, Node const & b) { return b.comp(*b.value, a); }
+    // friend static bool operator==(Node const & a, Node const & b) { !(*a < *b) && !(*b < *a); }
+
    private:
-    value_type *_value;
-    Node *_parent;
-    Node *_child[2];
-    value_compare _comp;
-    int _height;
+    value_type *value;
+    Node *left;
+    Node *right;
+    value_compare comp;
+    int height;
+    allocator_type alloc;
   };
 
   Node *root;
+  allocator_type alloc;
 };

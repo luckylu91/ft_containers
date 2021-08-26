@@ -61,8 +61,10 @@ class vector {
   }
 
   ~vector() {
-    if (_array != NULL)
-      delete _array;
+    if (_array != NULL) {
+      this->_destroy_from(0);
+      this->_deallocate();
+    }
   }
 
   vector &operator=(const vector &x) {
@@ -138,7 +140,7 @@ class vector {
     for (InputIterator it = first; it != last; ++it)
       push_back(*it);
   }
-  
+
   void assign (size_type n, const value_type& val) {
     _destroy_from(0);
     if (n > _capacity)
