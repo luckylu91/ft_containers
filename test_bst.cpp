@@ -3,7 +3,7 @@
 
 int main()
 {
-  BST< int, std::less<int> > bst;
+  BST< int, std::less<int> > bst(std::);
 
   for (int i = 0; i < 100; ++i)
     bst.insert(i);
