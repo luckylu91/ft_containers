@@ -26,11 +26,9 @@ class BST {
   }
 
  private:
-  class Node {
-   public:
-    Node(value_type const & val, value_compare & comp, allocator_type & alloc)
+  struct Node {
+    Node(value_type const & val, value_compare const & comp, allocator_type const & alloc)
       : value(NULL), left(NULL), right(NULL), parent(NULL), height(0), comp(comp), alloc(alloc) {
-        std::cout << "Node constructor OK" << std::endl;
         this->value = this->alloc.allocate(1);
         this->alloc.construct(this->value, val);
     }
@@ -81,16 +79,16 @@ class BST {
 
     // returns the new root in stead of "p"
     static Node *insert(Node *p, value_type const &new_val, BST const & bst) {
-      std::cout << "Inserting " << new_val << std::endl;
+      // std::cout << "Inserting " << new_val << std::endl;
 
       if (p == NULL)
         return new Node(new_val, bst.comp, bst.alloc);
       if (new_val < *p) {
-        p->left = insert(p->left, new_val);
+        p->left = insert(p->left, new_val, bst);
         setParent(p->left, p);
       }
       else if (*p < new_val) {
-        p->right = insert(p->right, new_val);
+        p->right = insert(p->right, new_val, bst);
         setParent(p->right, p);
       }
       else {
@@ -103,26 +101,26 @@ class BST {
       int balance = p->getBalance();
       // Left Left Case
       if (balance > 1 && new_val < *p->left) {
-        std::cout << "Left Left Case" << std::endl;
+        // std::cout << "Left Left Case" << std::endl;
         return rotateLeft(p);
       }
       // Left Right Case
       else if (balance > 1 && new_val > *p->left) {
-        std::cout << "Left Right Case" << std::endl;
+        // std::cout << "Left Right Case" << std::endl;
         p->left = rotateLeft(p->left);
         setParent(p->left, p);
         return rotateRight(p);
       }
       // Right Left Case
       else if (balance < -1 && new_val < *p->right) {
-        std::cout << "Right Left Case" << std::endl;
+        // std::cout << "Right Left Case" << std::endl;
         p->right = rotateRight(p->right);
         setParent(p->right, p);
         return rotateLeft(p);
       }
       // Right Right Case
       else if (balance < -1 && new_val > *p->right) {
-        std::cout << "Right Right Case" << std::endl;
+        // std::cout << "Right Right Case" << std::endl;
         return rotateLeft(p);
       }
       return p;
@@ -178,63 +176,112 @@ class BST {
       }
     }
 
-   private:
     value_type *value;
     Node *left;
     Node *right;
     Node *parent;
     int height;
-    value_compare &comp;
-    allocator_type &alloc;
+    value_compare comp;
+    allocator_type alloc;
   };
 
-  class NodeStack {
-  public:
-    NodeStack() : list(NULL) {}
-    ~NodeStack() {}
+  struct NodeList {
+    NodeList(Node *head, NodeList *tail) : head(head), tail(tail) {}
 
-    void push(Node *n) {
-      this->list = new NodeList(n, this->list);
+    ~NodeList() {
+      delete this->tail;
     }
 
-    void pop() {
-      NodeList *nl = this->list;
-      this->list = this->list->tail;
-      delete nl;
+    static void push(NodeList **lA, NodeList **lB) {
+      if (lA != NULL) {
+        NodeList *nl = *lA;
+        *lA = (*lA)->tail;
+        nl->tail = *lB;
+        *lB = nl;
+      }
+    }
+
+    Node *head;
+    NodeList *tail;
+  };
+
+  class NodeBiStack {
+  public:
+    NodeBiStack() : listA(NULL), listB(NULL) {}
+
+    ~NodeBiStack() {
+      if (this->listA != NULL)
+        delete this->listA;
+      if (this->listB != NULL)
+        delete this->listB;
+    }
+
+    void push(Node *n) {
+      this->listA = new NodeList(n, this->listA);
+    }
+
+    void pushB() {
+      NodeList::push(&this->listA, &this->listB);
+    }
+
+    void pushA() {
+      NodeList::push(&this->listB, &this->listA);
     }
 
     Node *top() {
-      return (this->list->head);
+      if (this->listA != NULL)
+        return this->listA->head;
+      else
+        return NULL;
+    }
+
+    bool isEnd() {
+      return this->listA == NULL;
     }
 
   private:
-    struct NodeList {
-      NodeList(Node *head, NodeList *tail) : head(head), tail(tail) {}
-      ~NodeList() {}
-      Node *head;
-      NodeList *tail;
-    }
+    NodeList *listA;
+    NodeList *listB;
+  };
 
-    NodeList *list;
-  }
-
+  //
+ public:
   // src https://www.geeksforgeeks.org/implementing-forward-iterator-in-bst/
   class NodeIterator {
+   public:
     NodeIterator(BST const & bst) {
       Node *n = bst.root;
-
       while (n != NULL) {
         stack.push(n);
         n = n->left;
       }
     }
-    ~NodeIterator()
-    Node *curr();
-    void next();
-    bool isEnd();
+    ~NodeIterator() {}
+
+    Node *current() {
+      return stack.top();
+    }
+
+    void next() {
+      Node *curr = this->current()->right;
+      this->stack.pushB();
+      while (curr != NULL) {
+        this->stack.push(curr);
+        curr = curr->left;
+      }
+    }
+
+    void previous() {
+      this->stack.pushA();
+    }
+
+    bool isEnd() {
+      return this->stack.isEnd();
+    }
+
   private:
-    NodeStack stack;
-  }
+    NodeBiStack stack;
+  };
 
  private:
   Node *root;
