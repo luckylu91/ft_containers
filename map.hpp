@@ -62,7 +62,7 @@ class map {
 // Iterators
 
   // Return iterator to beginning (public member function )
-  iterator begin();
+  iterator begin() { return iterator(*this) }
   const_iterator begin() const;
   // Return iterator to end (public member function )
   iterator end();
@@ -161,40 +161,41 @@ class map<Key, T, KeyCompare, Alloc>::iterator {
     typedef Alloc allocator_type;
     typedef typename allocator_type::pointer pointer;
     typedef typename allocator_type::reference reference;
-    typedef BST<value_type, value_compare, allocator_type>::Node node_type;
+    typedef BST<value_type, value_compare, allocator_type> bst_type;
+    typedef BST<value_type, value_compare, allocator_type>::NodeIterator iterator_type;
 
-    iterator() : _node(NULL) {}
+    iterator(bst_type const & bst) : nodeIterator(bst, false) {}
     iterator &operator=(iterator &x) {
-      _node = x._node;
+      nodeIterator = x.nodeIterator;
       return *this;
     }
 
-    reference operator*() const { return *_node.get_value(); }
-    reference operator->() const { return _node.get_value(); }
+    reference operator*() const { return *nodeIterator.current().get_value(); }
+    reference operator->() const { return nodeIterator.current().get_value(); }
     iterator &operator++() {
-      ++_ptr;
+      nodeIterator.next();
       return *this;
     }
     iterator operator++(int) {
       iterator old_value(*this);
-      ++_ptr;
+      nodeIterator.next();
       return old_value;
     }
     iterator &operator--() {
-      --_ptr;
+      nodeIterator.previous();
       return *this;
     }
     iterator operator--(int) {
       iterator old_value(*this);
-      --_ptr;
+      nodeIterator.previous();
       return old_value;
     }
 
-    friend bool operator==(iterator const &a, iterator const &b) { return a._ptr == b._ptr; };
-    friend bool operator!=(iterator const &a, iterator const &b) { return a._ptr != b._ptr; };
+    friend bool operator==(iterator const &a, iterator const &b) { return a.nodeIterator == b.nodeIterator; };
+    friend bool operator!=(iterator const &a, iterator const &b) { return a.nodeIterator != b.nodeIterator; };
 
    private:
-    node_type *_node;
+    iterator_type nodeIterator;
   };
 
 

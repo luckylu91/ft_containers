@@ -24,11 +24,12 @@ int main()
   // bst.insert(3);
   bst._print();
 
-  intBST::NodeIterator iter(bst);
-  printNode(iter.current());
-  iter.next();
-  iter.next();
-  printNode(iter.current());
-  iter.previous();
-  printNode(iter.current());
+  // intBST::NodeIterator iter(bst);
+  // printNode(iter.current());
+  // iter.next();
+  // iter.next();
+  // printNode(iter.current());
+  // iter.previous();
+  // printNode(iter.current());
+  
 }

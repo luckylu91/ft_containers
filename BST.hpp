@@ -26,6 +26,7 @@ class BST {
   }
 
  private:
+
   struct Node {
     Node(value_type const & val, value_compare const & comp, allocator_type const & alloc)
       : value(NULL), left(NULL), right(NULL), parent(NULL), height(0), comp(comp), alloc(alloc) {
@@ -188,6 +189,16 @@ class BST {
   struct NodeList {
     NodeList(Node *head, NodeList *tail) : head(head), tail(tail) {}
 
+    NodeList(NodeList const & other) : head(other.head), tail(new NodeList(*other.tail)) {}
+
+    NodeList & operator=(NodeList const & other) {
+      if (this->tail != NULL)
+        delete this->tail;
+      this->head = other.head;
+      this->tail = new NodeList(*other.tail);
+      return *this;
+    }
+
     ~NodeList() {
       delete this->tail;
     }
@@ -208,6 +219,18 @@ class BST {
   class NodeBiStack {
   public:
     NodeBiStack() : listA(NULL), listB(NULL) {}
+
+    NodeBiStack(NodeBiStack const & other) : listA(*other.listA), listB(*other.listB) {}
+
+    NodeBiStack & operator=(NodeBiStack const & other) {
+      if (this->listA != NULL)
+        delete this->listA;
+      if (this->listB != NULL)
+        delete this->listB;
+      this->listA = new NodeBiStack(*other.listA);
+      this->listB = new NodeBiStack(*other.listB);
+      return *this;
+    }
 
     ~NodeBiStack() {
       if (this->listA != NULL)
@@ -249,13 +272,21 @@ class BST {
   // src https://www.geeksforgeeks.org/implementing-forward-iterator-in-bst/
   class NodeIterator {
    public:
-    NodeIterator(BST const & bst) {
+    NodeIterator(BST const & bst, bool reverse = false) : reverse(reverse) {
       Node *n = bst.root;
       while (n != NULL) {
         stack.push(n);
-        n = n->left;
+        n = !this->reverse ? n->left : n->right;
       }
     }
+
+    NodeIterator(NodeIterator const & other) : stack(other.stack), reverse(other.reverse) {}
+
+    NodeIterator & operator=(NodeIterator const & other) {
+      this->stack = NodeBiStack(other.stack);
+      return *this;
+    }
+
     ~NodeIterator() {}
 
     Node *current() {
@@ -263,11 +294,11 @@ class BST {
     }
 
     void next() {
-      Node *curr = this->current()->right;
+      Node *curr = !this->reverse ? this->current()->right : this->current()->left;
       this->stack.pushB();
       while (curr != NULL) {
         this->stack.push(curr);
-        curr = curr->left;
+        curr = !this->reverse ? curr->left : curr->right;
       }
     }
 
@@ -279,8 +310,21 @@ class BST {
       return this->stack.isEnd();
     }
 
+    bool isReverse() {
+      return this->reverse;
+    }
+
+    bool operator==(NodeIterator const & other) {
+      return this->stack.top() == other.stack.top();
+    }
+
+    bool operator!=(NodeIterator const & other) {
+      return !this->operator==(other);
+    }
+
   private:
     NodeBiStack stack;
+    bool reverse;
   };
 
  private:
