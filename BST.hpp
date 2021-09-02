@@ -306,9 +306,9 @@ class BST {
       this->stack.pushA();
     }
 
-    bool isEnd() {
-      return this->stack.isEnd();
-    }
+    // bool isEnd() {
+    //   return this->stack.isEnd();
+    // }
 
     bool isReverse() {
       return this->reverse;
