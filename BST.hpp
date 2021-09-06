@@ -19,6 +19,10 @@ class BST {
     this->root = Node::insert(this->root, new_val, *this);
   }
 
+  bool empty() {
+    return this->root == NULL;
+  }
+
   void _print() {
     if (root != NULL)
       root->_print(0);
@@ -98,37 +102,117 @@ class BST {
       }
 
       p->updateHeight();
-      // p->height = 1 + std::max(nodeHeight(p->left), nodeHeight(p->right));
       int balance = p->getBalance();
       // Left Left Case
       if (balance > 1 && new_val < *p->left) {
-        // std::cout << "Left Left Case" << std::endl;
         return rotateLeft(p);
       }
       // Left Right Case
       else if (balance > 1 && new_val > *p->left) {
-        // std::cout << "Left Right Case" << std::endl;
         p->left = rotateLeft(p->left);
         setParent(p->left, p);
         return rotateRight(p);
       }
       // Right Left Case
       else if (balance < -1 && new_val < *p->right) {
-        // std::cout << "Right Left Case" << std::endl;
         p->right = rotateRight(p->right);
         setParent(p->right, p);
         return rotateLeft(p);
       }
       // Right Right Case
       else if (balance < -1 && new_val > *p->right) {
-        // std::cout << "Right Right Case" << std::endl;
         return rotateLeft(p);
       }
       return p;
     }
 
+    static Node *remove(Node *p, value_type const &val, BST const & bst) {
+      if (p == NULL)
+        return NULL;
+      if (*p == val) {
+        Node *new_root;
+        if (p->left == NULL && p->right == NULL)
+          new_root = NULL;
+        else if (p->left == NULL && p->right != NULL)
+          new_root = p->right;
+        else if (p->left != NULL && p->right == NULL)
+          new_root = p->left;
+        else {
+          // swap
+          Node *node_prev = p->previous();
+          Node *node_next = p->next();
+          Node *k = (node_prev->height >= node_next) ? node_prev : node_next;
+          if (k->parent != NULL) {
+            if (k->isLeftChild())
+              k->parent->left = NULL;
+            else
+              k->parent->right = NULL;
+          }
+          if (p->parent != NULL)
+            k->setParent(p->parent);
+
+          std::swap(k->left, p->left);
+          std::swap(k->right, p->right);
+
+          // balance
+        }
+        delete p;
+      }
+    }
+    else if (val < *p) {
+
+    }
+
     // TODO
     Node *find(value_type const & val);
+
+    Node *leftMostChild() {
+      if (this->left == NULL)
+        return this;
+      return this->left->leftMostChild();
+    }
+
+    Node *rightMostChild() {
+      if (this->right == NULL)
+        return this;
+      return this->right->rightMostChild();
+    }
+
+    bool isLeftChild() {
+      return this->parent != NULL && this->parent->left == this;
+    }
+
+    bool isRightChild() {
+      return this->parent != NULL && this->parent->right == this;
+    }
+
+    Node *firstParentLeft() {
+      if (this->parent == NULL)
+        return NULL;
+      if (this->isLeftChild())
+        return this->parent;
+      return this->parent->firstParentLeft();
+    }
+
+    Node *firstParentRight() {
+      if (this->parent == NULL)
+        return NULL;
+      if (this->isRightChild())
+        return this->parent;
+      return this->parent->firstParentRight();
+    }
+
+    Node *next() {
+      if (this->right != NULL)
+        return this->right->leftMostChild();
+      return this->firstParentLeft();
+    }
+
+    Node *previous() {
+      if (this->left != NULL)
+        return this->left->rightMostChild();
+      return this->firstParentRight();
+    }
 
     static int nodeHeight(Node *n) {
       if (n == NULL)
