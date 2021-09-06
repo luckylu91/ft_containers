@@ -19,13 +19,17 @@ class BST {
     this->root = Node::insert(this->root, new_val, *this);
   }
 
+  void remove(value_type const & val) {
+    this->root = Node::remove(this->root, val);
+  }
+
   bool empty() {
     return this->root == NULL;
   }
 
   void _print() {
     if (root != NULL)
-      root->_print(0);
+      root->_print();
     std::cout << "END" << std::endl;
   }
 
@@ -33,14 +37,14 @@ class BST {
 
   struct Node {
     Node(value_type const & val, value_compare const & comp, allocator_type const & alloc)
-      : value(NULL), left(NULL), right(NULL), parent(NULL), height(0), comp(comp), alloc(alloc) {
+      : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), comp(comp), alloc(alloc) {
         this->value = this->alloc.allocate(1);
         this->alloc.construct(this->value, val);
     }
 
     ~Node() {
-      alloc.destruct(this->value);
-      alloc.deallocate(this->value);
+      alloc.destroy(this->value);
+      alloc.deallocate(this->value, 1);
     }
 
     // void setChild(Node *n, int dir) {
@@ -52,6 +56,11 @@ class BST {
     static void setParent(Node *n, Node *p) {
       if (n != NULL)
         n->parent = p;
+    }
+
+    static void permute(Node *a, Node *b) {
+      std::swap(*a, *b);
+      std::swap(a->value, b->value);
     }
 
     static Node *rotateLeft(Node *x) {
@@ -85,22 +94,22 @@ class BST {
     // returns the new root in stead of "p"
     static Node *insert(Node *p, value_type const &new_val, BST const & bst) {
       // std::cout << "Inserting " << new_val << std::endl;
-
       if (p == NULL)
         return new Node(new_val, bst.comp, bst.alloc);
       if (new_val < *p) {
-        p->left = insert(p->left, new_val, bst);
-        setParent(p->left, p);
+        p->left = Node::insert(p->left, new_val, bst);
+        if (p->left != NULL)
+          p->left->parent = p;
       }
       else if (*p < new_val) {
-        p->right = insert(p->right, new_val, bst);
-        setParent(p->right, p);
+        p->right = Node::insert(p->right, new_val, bst);
+        if (p->right != NULL)
+          p->right->parent = p;
       }
       else {
         *p->value = new_val;
         return p;
       }
-
       p->updateHeight();
       int balance = p->getBalance();
       // Left Left Case
@@ -126,45 +135,76 @@ class BST {
       return p;
     }
 
-    static Node *remove(Node *p, value_type const &val, BST const & bst) {
+    static Node *remove(Node *p, value_type const &val) {
       if (p == NULL)
         return NULL;
-      if (*p == val) {
-        Node *new_root;
-        if (p->left == NULL && p->right == NULL)
-          new_root = NULL;
-        else if (p->left == NULL && p->right != NULL)
-          new_root = p->right;
-        else if (p->left != NULL && p->right == NULL)
-          new_root = p->left;
-        else {
-          // swap
-          Node *node_prev = p->previous();
-          Node *node_next = p->next();
-          Node *k = (node_prev->height >= node_next) ? node_prev : node_next;
-          if (k->parent != NULL) {
-            if (k->isLeftChild())
-              k->parent->left = NULL;
-            else
-              k->parent->right = NULL;
-          }
-          if (p->parent != NULL)
-            k->setParent(p->parent);
 
-          std::swap(k->left, p->left);
-          std::swap(k->right, p->right);
-
-          // balance
+      if (val < *p) {
+        p->left = Node::remove(p->left, val);
+        if (p->left != NULL) {
+          p->left->parent = p;
+          p->left->updateHeight();
         }
-        delete p;
+        return p;
       }
-    }
-    else if (val < *p) {
-
+      else if (*p < val) {
+        p->right = Node::remove(p->right, val);
+        if (p->right != NULL) {
+          p->right->parent = p;
+          p->right->updateHeight();
+        }
+        return p;
+      }
+      else {
+        if (p->left == NULL && p->right == NULL) {
+          delete p;
+          return NULL;
+        }
+        else if (p->left == NULL) {
+          Node *temp = p->right;
+          temp->parent = p;
+          p->right = NULL;
+          delete p;
+          return temp;
+        }
+        else if (p->right == NULL) {
+          Node *temp = p->left;
+          temp->parent = p;
+          p->left = NULL;
+          delete p;
+          return temp;
+        }
+        else {
+          Node *p_parent = p->parent;
+          Node *k = p->next();
+          // std::cout << "k = " << *k->value << ", left = " << k->left<< ", right = " << k->right << std::endl;
+          std::swap(p->value, k->value);
+          p->right = Node::remove(p->right, val);
+          if (p->right != NULL) {
+            p->right->parent = p;
+            p->right->updateHeight();
+          }
+          return p;
+        }
+      }
     }
 
     // TODO
     Node *find(value_type const & val);
+
+    Node *getIndex(int idx) {
+      int lSize = static_cast<int>(this->left->getSize());
+      if (idx == lSize)
+        return (this);
+      else if (idx < lSize)
+        return this->left->median(idx);
+      else
+        return this->right->median(idx - lSize);
+    }
+
+    Node *median() {
+      return this->getIndex(this->getSize() / 2);
+    }
 
     Node *leftMostChild() {
       if (this->left == NULL)
@@ -232,12 +272,12 @@ class BST {
     value_compare get_comparator() const { return this->comp; };
     value_type *get_value() const { return this->value; }
 
-    void _print(int level) {
+    void _print() {
       if (this->left != NULL)
-        this->left->_print(level + 1);
-      std::cout << *value << " (" << level << "), ";
+        this->left->_print();
+      std::cout << *value << " (" << this->height << "), ";
       if (this->right != NULL)
-        this->right->_print(level + 1);
+        this->right->_print();
     }
 
     friend bool operator<(Node const & a, value_type const & b) { return a.comp(*a.value, b); }
@@ -245,21 +285,21 @@ class BST {
     friend bool operator>(Node const & a, value_type const & b) { return a.comp(b, *a.value); }
     friend bool operator>(value_type const & a, Node const & b) { return b.comp(*b.value, a); }
 
-    Node const & next() {
-      Node *n = this;
-      Node *p;
+    // Node const & next() {
+    //   Node *n = this;
+    //   Node *p;
 
-      while (n != NULL) {
-        if (n->right != NULL)
-          return n->right;
-        p = n->parent;
-        if (p == NULL)
-          return NULL;
-        if (n == p->left)
-          return p;
-        n = p;
-      }
-    }
+    //   while (n != NULL) {
+    //     if (n->right != NULL)
+    //       return n->right;
+    //     p = n->parent;
+    //     if (p == NULL)
+    //       return NULL;
+    //     if (n == p->left)
+    //       return p;
+    //     n = p;
+    //   }
+    // }
 
     value_type *value;
     Node *left;

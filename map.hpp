@@ -75,7 +75,7 @@ class map {
 // Capacity
 
   // Test whether container is empty (public member function )
-  bool empty() const;
+  bool empty() const { return this->_tree->empty(); }
   // Return container size (public member function )
   size_type size() const;
   // Return maximum size (public member function )
@@ -92,9 +92,14 @@ class map {
   pair<iterator,bool> insert (const value_type& val);
   iterator insert (iterator position, const value_type& val);
   template <class InputIterator>  void insert (InputIterator first, InputIterator last);
+
   // Erase elements (public member function )
   void erase (iterator position);
-  size_type erase (const key_type& k);
+
+  size_type erase (const key_type& k) {
+    this->_tree.remove(k);
+  }
+
   void erase (iterator first, iterator last);
   // Swap content (public member function )
   void swap (map& x);
