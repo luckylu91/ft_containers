@@ -12,8 +12,7 @@ template <  class Key,                                     // map::key_type
             >
 class map {
  public:
-  class iterator;
-  class const_iterator;
+  template<class IteratorType> class Iterator;
   class value_compare;
 
   typedef Key key_type;
@@ -25,10 +24,15 @@ class map {
   typedef typename allocator_type::const_reference const_reference;
   typedef typename allocator_type::pointer pointer;
   typedef typename allocator_type::const_pointer const_pointer;
-  typedef typename std::reverse_iterator<iterator> reverse_iterator;
-  typedef typename std::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef Iterator<T> iterator;
+  typedef Iterator<const T> const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
   typedef typename allocator_type::difference_type difference_type;
   typedef typename allocator_type::size_type size_type;
+
+  typedef BST<value_type, value_compare, allocator_type> bst_type;
+  typedef BST<value_type, value_compare, allocator_type>::Node bst_node_type;
 
 // Construct map (public member function )
   // empty (1)
@@ -62,15 +66,17 @@ class map {
 // Iterators
 
   // Return iterator to beginning (public member function )
-  iterator begin() { return iterator(*this) }
-  const_iterator begin() const;
+  iterator begin() { return iterator(*this, false); }
+  const_iterator begin() const {return const_iterator(*this, false); }
   // Return iterator to end (public member function )
-  iterator end();
-  const_iterator end() const;
+  iterator end() { return iterator(*this, true); }
+  const_iterator end() const {return const_iterator(*this, true); }
   // Return reverse iterator to reverse beginning (public member function )
-  reverse_iterator rbegin();const_reverse_iterator rbegin() const;
+  reverse_iterator rbegin() { return reverse_iterator(*this, false); }
+  const_reverse_iterator rbegin() const {return const_reverse_iterator(*this, false); }
   // Return reverse iterator to reverse end (public member function )
-  reverse_iterator rend();const_reverse_iterator rend() const;
+  reverse_iterator rend() { return reverse_iterator(*this, true); }
+  const_reverse_iterator rend() const {return const_reverse_iterator(*this, true); }
 
 // Capacity
 
@@ -88,8 +94,11 @@ class map {
 
 // Modifiers
 
+  // TODO TODO TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // Insert elements (public member function )
-  pair<iterator,bool> insert (const value_type& val);
+  pair<iterator,bool> insert (const value_type& val) {
+    pair<
+  }
   iterator insert (iterator position, const value_type& val);
   template <class InputIterator>  void insert (InputIterator first, InputIterator last);
 
@@ -116,7 +125,8 @@ class map {
 // Operations
 
   // Get iterator to element (public member function )
-  iterator find (const key_type& k);const_iterator find (const key_type& k) const;
+  iterator find (const key_type& k);
+  const_iterator find (const key_type& k) const;
   // Count elements with a specific key (public member function )
   size_type count (const key_type& k) const;
   // Return iterator to lower bound (public member function )
@@ -157,51 +167,63 @@ public:
   }
 };
 
-template <class Key, class T, class KeyCompare, class Alloc>
-class map<Key, T, KeyCompare, Alloc>::iterator {
-   public:
-    typedef std::bidirectional_iterator_tag iterator_category;
-    typedef std::ptrdiff_t difference_type;
-    typedef T value_type;
-    typedef Alloc allocator_type;
-    typedef typename allocator_type::pointer pointer;
-    typedef typename allocator_type::reference reference;
-    typedef BST<value_type, value_compare, allocator_type> bst_type;
-    typedef BST<value_type, value_compare, allocator_type>::NodeIterator iterator_type;
+template <class Key, class T, class KeyCompare, class Alloc, class IteratorType>
+class map<Key, T, KeyCompare, Alloc>::Iterator<IteratorType> {
+ public:
+  typedef std::bidirectional_iterator_tag iterator_category;
+  typedef std::ptrdiff_t difference_type;
+  typedef IteratorType value_type;
+  typedef Alloc allocator_type;
+  typedef IteratorType* pointer;
+  typedef IteratorType& reference;
+  typedef BST<value_type, value_compare, allocator_type> bst_type;
+  typedef BST<value_type, value_compare, allocator_type>::Node node_type;
 
-    iterator(bst_type const & bst) : nodeIterator(bst, false) {}
-    iterator &operator=(iterator &x) {
-      nodeIterator = x.nodeIterator;
-      return *this;
-    }
+  Iterator(bst_type const & bst, bool isEnd) : bst(bst), isEnd(false) {
+    if (bst.root == NULL)
+      this->current = NULL;
+    else if (!isEnd)
+      this->current = bst.root->leftmost_child();
+    else
+      this->current = bst.root->rightmost_child();
+  }
+  Iterator &operator=(Iterator &x) {
+    this->current = x.current;
+    this->isEnd = isEnd;
+    return *this;
+  }
 
-    reference operator*() const { return *nodeIterator.current().get_value(); }
-    reference operator->() const { return nodeIterator.current().get_value(); }
-    iterator &operator++() {
-      nodeIterator.next();
-      return *this;
-    }
-    iterator operator++(int) {
-      iterator old_value(*this);
-      nodeIterator.next();
-      return old_value;
-    }
-    iterator &operator--() {
-      nodeIterator.previous();
-      return *this;
-    }
-    iterator operator--(int) {
-      iterator old_value(*this);
-      nodeIterator.previous();
-      return old_value;
-    }
+  reference operator*() const { return *current->get_value(); }
+  reference operator->() const { return current->get_value(); }
+  Iterator &operator++() {
+    Node *n = this->current->next();
+    if (n == NULL);
+      this->isEnd = true;
+    this->current = n;
+    return *this;
+  }
+  Iterator operator++(int) {
+    Iterator old_value(*this);
+    this->operator++();
+    return old_value;
+  }
+  Iterator &operator--() {
+    this->current = this->current->previous();
+    return *this;
+  }
+  Iterator operator--(int) {
+    Iterator old_value(*this);
+    this->operator--();
+    return old_value;
+  }
+  friend bool operator==(Iterator const &a, Iterator const &b) { return a.current == b.current; };
+  friend bool operator!=(Iterator const &a, Iterator const &b) { return a.current != b.current; };
 
-    friend bool operator==(iterator const &a, iterator const &b) { return a.nodeIterator == b.nodeIterator; };
-    friend bool operator!=(iterator const &a, iterator const &b) { return a.nodeIterator != b.nodeIterator; };
-
-   private:
-    iterator_type nodeIterator;
-  };
+ private:
+  node_type *current;
+  bst_type const & bst;
+  bool isEnd;
+};
 
 
 }  // namespace ft

@@ -14,18 +14,18 @@ int main()
   typedef BST< int, std::less<int> > intBST;
   intBST bst;
 
-  for (int i = 0; i < 7; ++i)
+  srand(time(NULL));
+  for (int i = 0; i < 15; ++i)
     bst.insert(i);
-  // bst.insert(0);
-  // bst.insert(1);
-  // bst.insert(-1);
-  // bst.insert(2);
-  // bst.insert(2);
-  // bst.insert(3);
   bst._print();
 
-  bst.remove(3);
-  bst._print();
+  for (int i = 0; i < 5; i++) {
+    int val = rand() % bst.getSize();
+    std::cout << "Removing " << val << std::endl;
+    bst.remove(val);
+    // bst._print();
+    bst._print();
+  }
 
   // intBST::NodeIterator iter(bst);
   // printNode(iter.current());
