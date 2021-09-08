@@ -6,7 +6,7 @@ using namespace std;
 
 int main()
 {
-	vector<int> vect(1);
+	vector<int> vect(1, 5);
 	try
 	{
 		vect.at(10);

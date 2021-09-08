@@ -97,7 +97,7 @@ class map {
   // TODO TODO TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // Insert elements (public member function )
   pair<iterator,bool> insert (const value_type& val) {
-    pair<
+    pair<bst_node_type
   }
   iterator insert (iterator position, const value_type& val);
   template <class InputIterator>  void insert (InputIterator first, InputIterator last);
