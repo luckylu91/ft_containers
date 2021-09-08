@@ -1,4 +1,4 @@
-#include "BST.hpp"
+#include "map.hpp"
 #include <functional>
 
 template <class T> void printNode(T *n) {
@@ -11,21 +11,20 @@ template <class T> void printNode(T *n) {
 
 int main()
 {
-  typedef BST< int, std::less<int> > intBST;
-  intBST bst;
+  typedef ft::map<int, int> mapInt;
+  mapInt m;
 
   srand(time(NULL));
   for (int i = 0; i < 15; ++i)
-    bst.insert(i);
-  bst._print();
+    m.insert(make_pair(i, i));
 
-  for (int i = 0; i < 5; i++) {
-    int val = rand() % bst.getSize();
-    std::cout << "Removing " << val << std::endl;
-    bst.remove(val);
-    // bst._print();
-    bst._print();
-  }
+  // for (int i = 0; i < 5; i++) {
+  //   int val = rand() % m.getSize();
+  //   std::cout << "Removing " << val << std::endl;
+  //   m.remove(val);
+  //   // bst._print();
+  //   m._prettyPrint();
+  // }
 
   // intBST::NodeIterator iter(bst);
   // printNode(iter.current());

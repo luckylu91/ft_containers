@@ -7,16 +7,20 @@
 #include <iomanip>
 #include "pair.hpp"
 
-template <class Value, class ValueCompare = std::less<Value>, class Alloc = std::allocator<Value> >
+template <class KeyType, class MappedType, class KeyCompare, class ValueCompare, class Alloc>
 class BST {
  public:
-  typedef Value value_type;
+  typedef KeyType key_type;
+  typedef MappedType mapped_type;
+  typedef pair<const key_type, mapped_type> value_type;
+  typedef KeyCompare key_compare;
   typedef ValueCompare value_compare;
   typedef Alloc allocator_type;
   class Node;
 
-  BST(value_compare const & comp = value_compare(), allocator_type const & alloc = allocator_type())
-    : root(NULL), size(0), comp(comp), alloc(alloc) {}
+  BST(const key_compare& kComp = key_compare(),
+      allocator_type const & alloc = allocator_type())
+    : root(NULL), size(0), kComp(kComp), comp(value_compare(kComp)), alloc(alloc) {}
 
   pair<Node*, bool> insert(value_type const & new_val) {
     this->root = Node::insert(this->root, new_val, *this);
@@ -29,6 +33,17 @@ class BST {
     this->root = Node::remove(this->root, val, *this);
     if (this->root != NULL)
       this->root->update_height();
+  }
+
+  mapped_type& find(key_type const &kVal) {
+    Node *n = Node::find(this->root, kVal);
+    if (n != NULL) {
+      return n->value.second;
+    }
+    else {
+      this->insert(make_pair(kVal, mapped_type())); // BOF
+      return this->root->get_last_added()->value->second;
+    }
   }
 
   bool empty() {
@@ -75,7 +90,7 @@ class BST {
   // // Multiply distances with max { strlen(itoa(value)) }
   // void _prettyPrint() {
   //   // int numberLeaves = _numberOfLeaves(this->root);
-  //   int height = Node::nodeHeight(this->root);
+  //   int height = Node::node_height(this->root);
   //   int numberLeaves = 1 << height;
   //   int **matrix = new int*[height];
   //   for (int i = 0; i < height; i++) {
@@ -96,8 +111,7 @@ class BST {
   //   }
   // }
 
- private:
-
+ public:
   struct Node {
     Node(value_type const & val, value_compare & comp, allocator_type & alloc)
       : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), comp(comp), alloc(alloc), oneWasAdded(true) {
@@ -105,6 +119,14 @@ class BST {
         this->alloc.construct(this->value, val);
         lastAdded = this;
     }
+
+    // Node(key_type const & kVal, value_compare & comp, allocator_type & alloc)
+    //   : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), comp(comp), alloc(alloc), oneWasAdded(true) {
+    //     this->value = this->alloc.allocate(1);
+    //     this->value->first = kVal;
+    //     this->value->second = mapped_type();
+    //     lastAdded = this;
+    // }
 
     ~Node() {
       alloc.destroy(this->value);
@@ -266,7 +288,19 @@ class BST {
     }
 
     // TODO
-    Node *find(value_type const & val);
+    static Node *find(Node *p, key_type const & kVal) {
+      if (p == NULL)
+        return NULL;
+      if (val < *p) {
+        return Node::find(p->left, kVal);
+      }
+      else if (val > *p) {
+        return Node::find(p->right, kVal);
+      }
+      else {
+        return p;
+      }
+    }
 
     Node *getIndex(int idx) {
       int lSize = static_cast<int>(this->left->getSize());
@@ -341,7 +375,8 @@ class BST {
     bool get_one_was_added() { return this->oneWasAdded; }
     void update_height() { this->height = 1 + std::max(node_height(this->left), node_height(this->right)); }
     allocator_type get_allocator() const { return this->alloc; };
-    value_compare get_comparator() const { return this->comp; };
+    value_compare get_key_comparator() const { return this->kComp; };
+    value_compare get_value_comparator() const { return this->comp; };
     value_type *get_value() const { return this->value; }
 
     void _print() {
@@ -353,9 +388,16 @@ class BST {
     }
 
     friend bool operator<(Node const & a, value_type const & b) { return a.comp(*a.value, b); }
+    friend bool operator<(Node const & a, key_type const & b) { return a.kComp(a.value->first, b); }
+
     friend bool operator<(value_type const & a, Node const & b) { return b.comp(a, *b.value); }
+    friend bool operator<(key_type const & a, Node const & b) { return b.kComp(a, b.value->first); }
+
     friend bool operator>(Node const & a, value_type const & b) { return a.comp(b, *a.value); }
+    friend bool operator>(Node const & a, key_type const & b) { return a.kComp(b, a.value->first); }
+
     friend bool operator>(value_type const & a, Node const & b) { return b.comp(*b.value, a); }
+    friend bool operator>(key_type const & a, Node const & b) { return b.kComp(b.value->first, a); }
 
     value_type *value;
     Node *left;
@@ -511,6 +553,7 @@ class BST {
  private:
   Node *root;
   size_t size;
+  key_compare kComp;
   value_compare comp;
   allocator_type alloc;
 };

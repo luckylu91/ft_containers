@@ -16,6 +16,31 @@
 
 namespace ft {
 
+// enable_if
+template <bool B, typename T = void> struct enable_if {};
+template <typename T> struct enable_if<true, T> { typedef T type; };
+
+// is_same
+template<class T, class U>
+struct is_same {
+  static const bool value = false;
+};
+template<class T>
+struct is_same<T, T> {
+  static const bool value = true;
+};
+
+// is_iterator
+template<typename T, typename = void>
+struct is_iterator {
+   static const bool value = false;
+};
+template<typename T>
+struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterator_traits<T>::value_type, void>::value>::type>
+{
+   static const bool value = true;
+};
+
 template <typename T, typename Alloc = std::allocator<T> >
 class vector {
  public:
@@ -36,12 +61,12 @@ class vector {
  public:
   // Constructors, Destructor, Assign operation
 
-  explicit vector(const allocator_type &alloc = allocator_type())
+  /*explicit*/ vector(const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
     _allocate(MIN_CAPACITY);
   }
 
-  explicit vector(size_type n, const value_type &val = value_type(),
+  /*explicit*/ vector(size_type n, const value_type &val = value_type(),
                   const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(n), _capacity(n), _allocator(alloc) {
     _allocate(n);
@@ -49,7 +74,8 @@ class vector {
   }
 
   template <class InputIterator>
-  vector(InputIterator first, InputIterator last,
+  vector(InputIterator first,
+         typename enable_if<is_iterator<InputIterator>::value, InputIterator>::type last,
          const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
     _allocate(MIN_CAPACITY);
@@ -340,137 +366,135 @@ class vector {
       if (new_capacity > _capacity)
         _enlarge(new_capacity);
   }
-};
 
-template <class T, class Alloc>
-void swap(vector<T, Alloc> &x, vector<T, Alloc> &y) {
-  std::swap(x._array, y._array);
-  std::swap(x._size, y._size);
-  std::swap(x._capacity, y._capacity);
-  std::swap(x._shrink_threshold, y._shrink_threshold);
-  std::swap(x._allocator, y._allocator);
-}
+  void swap(vector &x, vector &y) {
+    std::swap(x._array, y._array);
+    std::swap(x._size, y._size);
+    std::swap(x._capacity, y._capacity);
+    std::swap(x._shrink_threshold, y._shrink_threshold);
+    std::swap(x._allocator, y._allocator);
+  }
 
-template <typename T, typename Alloc >
-  class vector<T, Alloc>::iterator {
  public:
-  typedef std::random_access_iterator_tag iterator_category;
-  typedef std::ptrdiff_t difference_type;
-  typedef T value_type;
-  typedef Alloc allocator_type;
-  typedef typename allocator_type::pointer pointer;
-  typedef typename allocator_type::reference reference;
+  class iterator {
+   public:
+    typedef std::random_access_iterator_tag iterator_category;
+    typedef std::ptrdiff_t difference_type;
+    typedef T value_type;
+    typedef Alloc allocator_type;
+    typedef typename allocator_type::pointer pointer;
+    typedef typename allocator_type::reference reference;
 
-  iterator(pointer ptr = 0) : _ptr(ptr) {}
-  iterator &operator=(iterator &x) {
-    _ptr = x._ptr;
-    return *this;
-  }
+    iterator(pointer ptr = 0) : _ptr(ptr) {}
+    iterator &operator=(iterator &x) {
+      _ptr = x._ptr;
+      return *this;
+    }
 
-  reference operator*() const { return *_ptr; }
-  reference operator->() const { return _ptr; }
-  iterator &operator++() {
-    ++_ptr;
-    return *this;
-  }
-  iterator operator++(int) {
-    iterator old_value(*this);
-    ++_ptr;
-    return old_value;
-  }
-  iterator &operator--() {
-    --_ptr;
-    return *this;
-  }
-  iterator operator--(int) {
-    iterator old_value(*this);
-    --_ptr;
-    return old_value;
-  }
-  value_type &operator[](int i) { return *(_ptr + i); }
-  iterator &operator+=(difference_type delta) {
-    _ptr += delta;
-    return *this;
-  }
-  iterator &operator-=(difference_type delta) {
-    _ptr -= delta;
-    return *this;
-  }
+    reference operator*() const { return *_ptr; }
+    reference operator->() const { return _ptr; }
+    iterator &operator++() {
+      ++_ptr;
+      return *this;
+    }
+    iterator operator++(int) {
+      iterator old_value(*this);
+      ++_ptr;
+      return old_value;
+    }
+    iterator &operator--() {
+      --_ptr;
+      return *this;
+    }
+    iterator operator--(int) {
+      iterator old_value(*this);
+      --_ptr;
+      return old_value;
+    }
+    value_type &operator[](int i) { return *(_ptr + i); }
+    iterator &operator+=(difference_type delta) {
+      _ptr += delta;
+      return *this;
+    }
+    iterator &operator-=(difference_type delta) {
+      _ptr -= delta;
+      return *this;
+    }
 
-  friend difference_type operator-(iterator const &a, iterator const &b) { return a._ptr - b._ptr; };
-  friend iterator operator+(iterator const &a, difference_type delta) { return iterator(a._ptr + delta); };
-  friend iterator operator+(difference_type delta, iterator const &a) { return iterator(a._ptr + delta); };
-  friend iterator operator-(iterator const &a, difference_type delta) { return iterator(a._ptr - delta); };
-  friend bool operator==(iterator const &a, iterator const &b) { return a._ptr == b._ptr; };
-  friend bool operator!=(iterator const &a, iterator const &b) { return a._ptr != b._ptr; };
-  friend bool operator<(iterator const &a, iterator const &b) { return a._ptr < b._ptr; };
-  friend bool operator>(iterator const &a, iterator const &b) { return a._ptr > b._ptr; };
-  friend bool operator<=(iterator const &a, iterator const &b) { return a._ptr <= b._ptr; };
-  friend bool operator>=(iterator const &a, iterator const &b) { return a._ptr >= b._ptr; };
+    friend difference_type operator-(iterator const &a, iterator const &b) { return a._ptr - b._ptr; };
+    friend iterator operator+(iterator const &a, difference_type delta) { return iterator(a._ptr + delta); };
+    friend iterator operator+(difference_type delta, iterator const &a) { return iterator(a._ptr + delta); };
+    friend iterator operator-(iterator const &a, difference_type delta) { return iterator(a._ptr - delta); };
+    friend bool operator==(iterator const &a, iterator const &b) { return a._ptr == b._ptr; };
+    friend bool operator!=(iterator const &a, iterator const &b) { return a._ptr != b._ptr; };
+    friend bool operator<(iterator const &a, iterator const &b) { return a._ptr < b._ptr; };
+    friend bool operator>(iterator const &a, iterator const &b) { return a._ptr > b._ptr; };
+    friend bool operator<=(iterator const &a, iterator const &b) { return a._ptr <= b._ptr; };
+    friend bool operator>=(iterator const &a, iterator const &b) { return a._ptr >= b._ptr; };
 
- private:
-  pointer _ptr;
-};
+   private:
+    pointer _ptr;
+  };
 
-template <typename T, typename Alloc >
-  class vector<T, Alloc>::const_iterator {
- public:
-  typedef std::random_access_iterator_tag iterator_category;
-  typedef std::ptrdiff_t difference_type;
-  typedef T value_type;
-  typedef Alloc allocator_type;
-  typedef typename allocator_type::const_pointer pointer;
-  typedef typename allocator_type::const_reference reference;
+  class const_iterator {
+   public:
+    typedef std::random_access_iterator_tag iterator_category;
+    typedef std::ptrdiff_t difference_type;
+    typedef T value_type;
+    typedef Alloc allocator_type;
+    typedef typename allocator_type::const_pointer pointer;
+    typedef typename allocator_type::const_reference reference;
 
-  const_iterator(pointer ptr = 0) : _ptr(ptr) {}
-  const_iterator &operator=(const_iterator &x) {
-    _ptr = x._ptr;
-    return *this;
-  }
+    const_iterator(pointer ptr = 0) : _ptr(ptr) {}
+    const_iterator &operator=(const_iterator &x) {
+      _ptr = x._ptr;
+      return *this;
+    }
 
-  reference operator*() const { return *_ptr; }
-  reference operator->() const { return _ptr; }
-  const_iterator &operator++() {
-    ++_ptr;
-    return *this;
-  }
-  const_iterator operator++(int) {
-    const_iterator old_value(*this);
-    ++_ptr;
-    return old_value;
-  }
-  const_iterator &operator--() {
-    --_ptr;
-    return *this;
-  }
-  const_iterator operator--(int) {
-    const_iterator old_value(*this);
-    --_ptr;
-    return old_value;
-  }
-  reference operator[](int i) { return *(_ptr + i); }
-  const_iterator &operator+=(difference_type delta) {
-    _ptr += delta;
-    return *this;
-  }
-  const_iterator &operator-=(difference_type delta) {
-    _ptr -= delta;
-    return *this;
-  }
+    reference operator*() const { return *_ptr; }
+    reference operator->() const { return _ptr; }
+    const_iterator &operator++() {
+      ++_ptr;
+      return *this;
+    }
+    const_iterator operator++(int) {
+      const_iterator old_value(*this);
+      ++_ptr;
+      return old_value;
+    }
+    const_iterator &operator--() {
+      --_ptr;
+      return *this;
+    }
+    const_iterator operator--(int) {
+      const_iterator old_value(*this);
+      --_ptr;
+      return old_value;
+    }
+    reference operator[](int i) { return *(_ptr + i); }
+    const_iterator &operator+=(difference_type delta) {
+      _ptr += delta;
+      return *this;
+    }
+    const_iterator &operator-=(difference_type delta) {
+      _ptr -= delta;
+      return *this;
+    }
 
-  friend difference_type operator-(const_iterator const &a, const_iterator const &b) { return a._ptr - b._ptr; };
-  friend const_iterator operator+(const_iterator const &a, difference_type delta) { return const_iterator(a._ptr + delta); };
-  friend const_iterator operator+(difference_type delta, const_iterator const &a) { return const_iterator(a._ptr + delta); };
-  friend const_iterator operator-(const_iterator const &a, difference_type delta) { return const_iterator(a._ptr - delta); };
-  friend bool operator==(const_iterator const &a, const_iterator const &b) { return a._ptr == b._ptr; };
-  friend bool operator!=(const_iterator const &a, const_iterator const &b) { return a._ptr != b._ptr; };
-  friend bool operator<(const_iterator const &a, const_iterator const &b) { return a._ptr < b._ptr; };
-  friend bool operator>(const_iterator const &a, const_iterator const &b) { return a._ptr > b._ptr; };
-  friend bool operator<=(const_iterator const &a, const_iterator const &b) { return a._ptr <= b._ptr; };
-  friend bool operator>=(const_iterator const &a, const_iterator const &b) { return a._ptr >= b._ptr; };
+    friend difference_type operator-(const_iterator const &a, const_iterator const &b) { return a._ptr - b._ptr; };
+    friend const_iterator operator+(const_iterator const &a, difference_type delta) { return const_iterator(a._ptr + delta); };
+    friend const_iterator operator+(difference_type delta, const_iterator const &a) { return const_iterator(a._ptr + delta); };
+    friend const_iterator operator-(const_iterator const &a, difference_type delta) { return const_iterator(a._ptr - delta); };
+    friend bool operator==(const_iterator const &a, const_iterator const &b) { return a._ptr == b._ptr; };
+    friend bool operator!=(const_iterator const &a, const_iterator const &b) { return a._ptr != b._ptr; };
+    friend bool operator<(const_iterator const &a, const_iterator const &b) { return a._ptr < b._ptr; };
+    friend bool operator>(const_iterator const &a, const_iterator const &b) { return a._ptr > b._ptr; };
+    friend bool operator<=(const_iterator const &a, const_iterator const &b) { return a._ptr <= b._ptr; };
+    friend bool operator>=(const_iterator const &a, const_iterator const &b) { return a._ptr >= b._ptr; };
 
- private:
-  pointer _ptr;
+   private:
+    pointer _ptr;
+  };
 };
 
 }  // namespace ft

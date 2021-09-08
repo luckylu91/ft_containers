@@ -24,23 +24,24 @@ class map {
   typedef typename allocator_type::const_reference const_reference;
   typedef typename allocator_type::pointer pointer;
   typedef typename allocator_type::const_pointer const_pointer;
-  typedef Iterator<T> iterator;
-  typedef Iterator<const T> const_iterator;
+  typedef Iterator<mapped_type> iterator;
+  typedef Iterator<const mapped_type> const_iterator;
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
   typedef typename allocator_type::difference_type difference_type;
   typedef typename allocator_type::size_type size_type;
 
-  typedef BST<value_type, value_compare, allocator_type> bst_type;
-  typedef BST<value_type, value_compare, allocator_type>::Node bst_node_type;
+  typedef BST<key_type, mapped_type, value_compare, allocator_type> bst_type;
+  typedef BST<key_type, mapped_type, value_compare, allocator_type>::Node bst_node_type;
 
 // Construct map (public member function )
   // empty (1)
-  explicit map(const key_compare& comp = key_compare(),
+  explicit map(const key_compare& kComp = key_compare(),
                const allocator_type& alloc = allocator_type())
-    : _tree(BST(comp, alloc)),
-      _comp(this->_tree->get_comparator()),
-      _alloc(this->_tree->get_comparator()) {}
+    : _tree(BST(kComp, alloc)),
+      _kComp(this->_tree->get_key_comparator()),
+      _comp(this->_tree->get_value_comparator()),
+      _alloc(this->_tree->get_allocator()) {}
 
   // range (2)
   template <class InputIterator>
@@ -90,17 +91,29 @@ class map {
 // Element access
 
   // Access element (public member function )
-  mapped_type& operator[] (const key_type& k);
+  mapped_type& operator[] (const key_type& k) {
+    
+  }
 
 // Modifiers
 
-  // TODO TODO TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // Insert elements (public member function )
   pair<iterator,bool> insert (const value_type& val) {
-    pair<bst_node_type
+    pair<bst_node_type*, bool> insertResult = this->_tree->insert(val);
+    return make_pair(iterator(*this, insertResult.first), insertResult.second);
   }
-  iterator insert (iterator position, const value_type& val);
-  template <class InputIterator>  void insert (InputIterator first, InputIterator last);
+
+  // MEILLEUR MOYEN ?
+  iterator insert(iterator position, const value_type& val) {
+    pair<bst_node_type*, bool> insertResult = this->_tree->insert(val);
+    return iterator(*this, insertResult.first);
+  }
+
+  template <class InputIterator>  void insert(InputIterator first, InputIterator last) {
+    for (InputIterator it = first; it != end; ++it) {
+      insert(*it);
+    }
+  }
 
   // Erase elements (public member function )
   void erase (iterator position);
@@ -142,87 +155,89 @@ class map {
   // Get allocator (public member function )
   allocator_type get_allocator() const { return this->_tree.get};
 
+  class value_compare
+  {   // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
+    friend class map;
+  protected:
+    KeyCompare comp;
+    value_compare (KeyCompare c) : comp(c) {}  // constructed with map's comparison object
+  public:
+    typedef bool result_type;
+    typedef value_type first_argument_type;
+    typedef value_type second_argument_type;
+    bool operator() (const value_type& x, const value_type& y) const {
+      return comp(x.first, y.first);
+    }
+  };
 
+  template <class IteratorType>
+    class Iterator<IteratorType> {
+   public:
+    typedef std::bidirectional_iterator_tag iterator_category;
+    typedef std::ptrdiff_t difference_type;
+    typedef IteratorType value_type;
+    typedef Alloc allocator_type;
+    typedef IteratorType* pointer;
+    typedef IteratorType& reference;
+    typedef BST<value_type, value_compare, allocator_type> bst_type;
+    typedef BST<value_type, value_compare, allocator_type>::Node node_type;
 
-private:
-  BST<value_type, value_compare, allocator_type> _tree;
-  value_compare &comp;
-  allocator_type &alloc;
-};
+    Iterator(bst_type const & bst, bool isEnd) : bst(bst), isEnd(isEnd) {
+      if (bst.root == NULL)
+        this->current = NULL;
+      else if (!isEnd)
+        this->current = bst.root->leftmost_child();
+      else
+        this->current = bst.root->rightmost_child();
+    }
 
+    Iterator(bst_type &bst, node_type *node) : bst(bst), isEnd(false) {
+      this->current = node;
+    }
 
-template <class Key, class T, class KeyCompare, class Alloc>
-class map<Key, T, KeyCompare, Alloc>::value_compare
-{   // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
-  friend class map;
-protected:
-  KeyCompare comp;
-  value_compare (KeyCompare c) : comp(c) {}  // constructed with map's comparison object
-public:
-  typedef bool result_type;
-  typedef value_type first_argument_type;
-  typedef value_type second_argument_type;
-  bool operator() (const value_type& x, const value_type& y) const {
-    return comp(x.first, y.first);
-  }
-};
+    Iterator &operator=(Iterator &x) {
+      this->current = x.current;
+      this->isEnd = isEnd;
+      return *this;
+    }
 
-template <class Key, class T, class KeyCompare, class Alloc, class IteratorType>
-class map<Key, T, KeyCompare, Alloc>::Iterator<IteratorType> {
- public:
-  typedef std::bidirectional_iterator_tag iterator_category;
-  typedef std::ptrdiff_t difference_type;
-  typedef IteratorType value_type;
-  typedef Alloc allocator_type;
-  typedef IteratorType* pointer;
-  typedef IteratorType& reference;
-  typedef BST<value_type, value_compare, allocator_type> bst_type;
-  typedef BST<value_type, value_compare, allocator_type>::Node node_type;
+    reference operator*() const { return *current->get_value(); }
+    reference operator->() const { return current->get_value(); }
+    Iterator &operator++() {
+      Node *n = this->current->next();
+      if (n == NULL);
+        this->isEnd = true;
+      this->current = n;
+      return *this;
+    }
+    Iterator operator++(int) {
+      Iterator old_value(*this);
+      this->operator++();
+      return old_value;
+    }
+    Iterator &operator--() {
+      this->current = this->current->previous();
+      return *this;
+    }
+    Iterator operator--(int) {
+      Iterator old_value(*this);
+      this->operator--();
+      return old_value;
+    }
+    friend bool operator==(Iterator const &a, Iterator const &b) { return a.current == b.current; };
+    friend bool operator!=(Iterator const &a, Iterator const &b) { return a.current != b.current; };
 
-  Iterator(bst_type const & bst, bool isEnd) : bst(bst), isEnd(false) {
-    if (bst.root == NULL)
-      this->current = NULL;
-    else if (!isEnd)
-      this->current = bst.root->leftmost_child();
-    else
-      this->current = bst.root->rightmost_child();
-  }
-  Iterator &operator=(Iterator &x) {
-    this->current = x.current;
-    this->isEnd = isEnd;
-    return *this;
-  }
-
-  reference operator*() const { return *current->get_value(); }
-  reference operator->() const { return current->get_value(); }
-  Iterator &operator++() {
-    Node *n = this->current->next();
-    if (n == NULL);
-      this->isEnd = true;
-    this->current = n;
-    return *this;
-  }
-  Iterator operator++(int) {
-    Iterator old_value(*this);
-    this->operator++();
-    return old_value;
-  }
-  Iterator &operator--() {
-    this->current = this->current->previous();
-    return *this;
-  }
-  Iterator operator--(int) {
-    Iterator old_value(*this);
-    this->operator--();
-    return old_value;
-  }
-  friend bool operator==(Iterator const &a, Iterator const &b) { return a.current == b.current; };
-  friend bool operator!=(Iterator const &a, Iterator const &b) { return a.current != b.current; };
+   private:
+    node_type *current;
+    bst_type const & bst;
+    bool isEnd;
+  };
 
  private:
-  node_type *current;
-  bst_type const & bst;
-  bool isEnd;
+  BST<value_type, key_compare, value_compare, allocator_type> _tree;
+  key_compare &_kComp;
+  value_compare &_comp;
+  allocator_type &_alloc;
 };
 
 
