@@ -35,7 +35,11 @@ class BST {
       this->root->update_height();
   }
 
-  mapped_type& find(key_type const &kVal) {
+  Node *find(key_type const &kVal) {
+      return Node::find(this->root, kVal);
+  }
+
+  mapped_type &find_or_insert(key_type const &kVal) {
     Node *n = Node::find(this->root, kVal);
     if (n != NULL) {
       return n->value.second;

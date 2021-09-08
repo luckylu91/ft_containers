@@ -92,7 +92,7 @@ class map {
 
   // Access element (public member function )
   mapped_type& operator[] (const key_type& k) {
-    
+    return this->_tree->find_or_insert(k);
   }
 
 // Modifiers
@@ -138,8 +138,16 @@ class map {
 // Operations
 
   // Get iterator to element (public member function )
-  iterator find (const key_type& k);
-  const_iterator find (const key_type& k) const;
+  iterator find (const key_type& k) {
+    bst_node_type *n = this->_tree->find(k);
+    return iterator(*this, n);
+  }
+
+  const_iterator find (const key_type& k) const {
+    bst_node_type *n = this->_tree->find(k);
+    return const_iterator(*this, n);
+  }
+
   // Count elements with a specific key (public member function )
   size_type count (const key_type& k) const;
   // Return iterator to lower bound (public member function )
@@ -191,7 +199,7 @@ class map {
         this->current = bst.root->rightmost_child();
     }
 
-    Iterator(bst_type &bst, node_type *node) : bst(bst), isEnd(false) {
+    Iterator(bst_type &bst, node_type *node) : bst(bst), isEnd(node != NULL) {
       this->current = node;
     }
 
