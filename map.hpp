@@ -67,26 +67,28 @@ class map {
 // Iterators
 
   // Return iterator to beginning (public member function )
-  iterator begin() { return iterator(*this, false); }
-  const_iterator begin() const {return const_iterator(*this, false); }
+  iterator begin()                      { return iterator(*this, false); }
+  const_iterator begin() const          { return const_iterator(*this, false); }
   // Return iterator to end (public member function )
-  iterator end() { return iterator(*this, true); }
-  const_iterator end() const {return const_iterator(*this, true); }
+  iterator end()                        { return iterator(*this, true); }
+  const_iterator end() const            { return const_iterator(*this, true); }
   // Return reverse iterator to reverse beginning (public member function )
-  reverse_iterator rbegin() { return reverse_iterator(*this, false); }
-  const_reverse_iterator rbegin() const {return const_reverse_iterator(*this, false); }
+  reverse_iterator rbegin()             { return reverse_iterator(this->end()); }
+  const_reverse_iterator rbegin() const { return const_reverse_iterator(this->end()); }
   // Return reverse iterator to reverse end (public member function )
-  reverse_iterator rend() { return reverse_iterator(*this, true); }
-  const_reverse_iterator rend() const {return const_reverse_iterator(*this, true); }
+  reverse_iterator rend()               { return reverse_iterator(this->begin()); }
+  const_reverse_iterator rend() const   { return const_reverse_iterator(this->begin()); }
 
 // Capacity
 
   // Test whether container is empty (public member function )
-  bool empty() const { return this->_tree->empty(); }
+  bool empty() const { return this->_tree.empty(); }
+
   // Return container size (public member function )
-  size_type size() const;
+  size_type size() const { return this->_tree.get_size() };
+
   // Return maximum size (public member function )
-  size_type max_size() const;
+  size_type max_size() const { return this->_alloc.max_size(); }
 
 // Element access
 
@@ -191,12 +193,10 @@ class map {
     typedef BST<value_type, value_compare, allocator_type>::Node node_type;
 
     Iterator(bst_type const & bst, bool isEnd) : bst(bst), isEnd(isEnd) {
-      if (bst.root == NULL)
+      if (bst.root == NULL || isEnd)
         this->current = NULL;
-      else if (!isEnd)
-        this->current = bst.root->leftmost_child();
       else
-        this->current = bst.root->rightmost_child();
+        this->current = bst.root->leftmost_child();
     }
 
     Iterator(bst_type &bst, node_type *node) : bst(bst), isEnd(node != NULL) {
@@ -213,9 +213,10 @@ class map {
     reference operator->() const { return current->get_value(); }
     Iterator &operator++() {
       Node *n = this->current->next();
-      if (n == NULL);
+      if (n != NULL);
+        this->current = n;
+      else
         this->isEnd = true;
-      this->current = n;
       return *this;
     }
     Iterator operator++(int) {
@@ -224,7 +225,11 @@ class map {
       return old_value;
     }
     Iterator &operator--() {
-      this->current = this->current->previous();
+      if (this->isEnd) {
+        this->isEnd = false;
+      }
+      else
+        this->current = this->current->previous();
       return *this;
     }
     Iterator operator--(int) {
@@ -239,6 +244,8 @@ class map {
     node_type *current;
     bst_type const & bst;
     bool isEnd;
+
+    void setTo
   };
 
  private:

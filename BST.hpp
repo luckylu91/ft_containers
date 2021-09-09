@@ -20,7 +20,7 @@ class BST {
 
   BST(const key_compare& kComp = key_compare(),
       allocator_type const & alloc = allocator_type())
-    : root(NULL), size(0), kComp(kComp), comp(value_compare(kComp)), alloc(alloc) {}
+    : root(NULL), kComp(kComp), comp(value_compare(kComp)), alloc(alloc) {}
 
   pair<Node*, bool> insert(value_type const & new_val) {
     this->root = Node::insert(this->root, new_val, *this);
@@ -54,8 +54,8 @@ class BST {
     return this->root == NULL;
   }
 
-  size_t getSize() {
-    return this->size;
+  size_t get_size() {
+    return Node::get_size(this->root);
   }
 
   void _print() {
@@ -231,6 +231,7 @@ class BST {
       return p;
     }
 
+    // TODO balance
     static Node *remove(Node *p, value_type const &val, BST &bst) {
       if (p == NULL)
         return NULL;
@@ -291,7 +292,6 @@ class BST {
       }
     }
 
-    // TODO
     static Node *find(Node *p, key_type const & kVal) {
       if (p == NULL)
         return NULL;
@@ -306,18 +306,24 @@ class BST {
       }
     }
 
-    Node *getIndex(int idx) {
-      int lSize = static_cast<int>(this->left->getSize());
-      if (idx == lSize)
-        return (this);
-      else if (idx < lSize)
-        return this->left->median(idx);
-      else
-        return this->right->median(idx - lSize);
+    static size_t get_size(Node *p) {
+      if (p == NULL)
+        return (0);
+      return (1 + Node::get_size(p->left) + Node::get_size(p->right));
     }
 
-    Node *median() {
-      return this->getIndex(this->getSize() / 2);
+    // Node *getIndex(int idx) {
+    //   int lSize = static_cast<int>(this->left->getSize());
+    //   if (idx == lSize)
+    //     return (this);
+    //   else if (idx < lSize)
+    //     return this->left->median(idx);
+    //   else
+    //     return this->right->median(idx - lSize);
+    // }
+
+    // Node *median() {
+    //   return this->getIndex(this->getSize() / 2);
     }
 
     Node *leftmost_child() {
@@ -414,6 +420,12 @@ class BST {
     bool oneWasAdded;
   };
 
+ private:
+  Node *root;
+  key_compare kComp;
+  value_compare comp;
+  allocator_type alloc;
+  
 //   struct NodeList {
 //     NodeList(Node *head, NodeList *tail) : head(head), tail(tail) {}
 
@@ -554,11 +566,5 @@ class BST {
 //     bool reverse;
 //   };
 
- private:
-  Node *root;
-  size_t size;
-  key_compare kComp;
-  value_compare comp;
-  allocator_type alloc;
 };
 
