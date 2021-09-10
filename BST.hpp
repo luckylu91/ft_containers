@@ -231,27 +231,36 @@ class BST {
       return p;
     }
 
+    static Node *move_only_child_up(Node *p) {
+      Node *temp = p->left != NULL ? p->left : p->right;
+      temp->parent = p->parent;
+      p->left = NULL;
+      p->right = NULL;
+      delete p;
+      return temp;
+    }
+
+    static Node* remove_in_child(Node *p, bool isLeft) {
+
+    }
+
     // TODO balance
     static Node *remove(Node *p, value_type const &val, BST &bst) {
       if (p == NULL)
         return NULL;
       if (val < *p) {
         p->left = Node::remove(p->left, val, bst);
-        if (p->left != NULL) {
-          p->left->parent = p;
-          p->left->update_height();
-        }
-        p->update_height();
-        return p;
+        // if (p->left != NULL) {
+        //   p->left->parent = p;
+        //   p->left->update_height();
+        // }
       }
       else if (*p < val) {
         p->right = Node::remove(p->right, val, bst);
-        if (p->right != NULL) {
-          p->right->parent = p;
-          p->right->update_height();
-        }
-        p->update_height();
-        return p;
+        // if (p->right != NULL) {
+        //   p->right->parent = p;
+        //   p->right->update_height();
+        // }
       }
       else {
         if (p->left == NULL && p->right == NULL) {
@@ -259,37 +268,48 @@ class BST {
           bst.size--;
           return NULL;
         }
-        else if (p->left == NULL) {
-          Node *temp = p->right;
-          temp->parent = p->parent;
-          p->right = NULL;
-          delete p;
+        else if (p->left == NULL || p->right == NULL) {
           bst.size--;
-
-          return temp;
-        }
-        else if (p->right == NULL) {
-          Node *temp = p->left;
-          temp->parent = p->parent;
-          p->left = NULL;
-          delete p;
-          bst.size--;
-          return temp;
+          return Node::move_only_child_up(p);
         }
         else {
           Node *p_parent = p->parent;
           Node *k = p->next();
-          // std::cout << "k = " << *k->value << ", left = " << k->left<< ", right = " << k->right << std::endl;
           std::swap(p->value, k->value);
           p->right = Node::remove(p->right, val, bst);
-          if (p->right != NULL) {
-            p->right->parent = p;
-            p->right->update_height();
-          }
-          p->update_height();
-          return p;
+          // if (p->right != NULL) {
+          //   p->right->parent = p;
+          //   p->right->update_height();
+          // }
         }
       }
+      p->update_height();
+      int balance[2];
+      balance[0] = p->get_balance();
+      if (balance[0] >= -1 && balance[0] <= 1)
+        return p;
+      balance[1] = balance[0] > 1 ? p->left->get_balance() : p->right->get_balance();
+      // Left Left Case
+      if (balance[0] > 0 && balance[1] > 0) {
+        return rotate_left(p);
+      }
+      // Left Right Case
+      else if (balance[0] > 0 && balance[1] < 0) {
+        p->left = rotate_left(p->left);
+        Node::set_parent(p->left, p);
+        return rotate_right(p);
+      }
+      // Right Left Case
+      else if (balance[0] < 0 && balance[1] > 0) {
+        p->right = rotate_right(p->right);
+        Node::set_parent(p->right, p);
+        return rotate_left(p);
+      }
+      // Right Right Case
+      else if (balance[0] < 0 && balance[1] < 0) {
+        return rotate_left(p);
+      }
+      return p;
     }
 
     static Node *find(Node *p, key_type const & kVal) {
@@ -425,7 +445,7 @@ class BST {
   key_compare kComp;
   value_compare comp;
   allocator_type alloc;
-  
+
 //   struct NodeList {
 //     NodeList(Node *head, NodeList *tail) : head(head), tail(tail) {}
 
