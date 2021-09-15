@@ -15,46 +15,45 @@ class map {
   template<class IteratorType> class Iterator;
   class value_compare;
 
-  typedef Key key_type;
-  typedef T mapped_type;
-  typedef pair<const key_type,mapped_type> value_type;
-  typedef KeyCompare key_compare;
-  typedef Alloc allocator_type;
-  typedef typename allocator_type::reference reference;
+  typedef Key                                      key_type;
+  typedef T                                        mapped_type;
+  typedef pair<const key_type,mapped_type>         value_type;
+  typedef KeyCompare                               key_compare;
+  typedef Alloc                                    allocator_type;
+  typedef typename allocator_type::reference       reference;
   typedef typename allocator_type::const_reference const_reference;
-  typedef typename allocator_type::pointer pointer;
-  typedef typename allocator_type::const_pointer const_pointer;
-  typedef Iterator<value_type> iterator;
-  typedef Iterator<const value_type> const_iterator;
-  typedef std::reverse_iterator<iterator> reverse_iterator;
-  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef typename allocator_type::pointer         pointer;
+  typedef typename allocator_type::const_pointer   const_pointer;
+  typedef Iterator<value_type>                     iterator;
+  typedef Iterator<const value_type>               const_iterator;
+  typedef std::reverse_iterator<iterator>          reverse_iterator;
+  typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
   typedef typename allocator_type::difference_type difference_type;
-  typedef typename allocator_type::size_type size_type;
+  typedef typename allocator_type::size_type       size_type;
 
-  typedef BST<key_type, mapped_type, value_compare, allocator_type> bst_type;
-  typedef BST<key_type, mapped_type, value_compare, allocator_type>::Node bst_node_type;
+  typedef BST<key_type, mapped_type, key_compare, value_compare, allocator_type>                bst_type;
+  typedef typename BST<key_type, mapped_type, key_compare, value_compare, allocator_type>::Node bst_node_type;
 
 // Construct map (public member function )
   // empty (1)
   explicit map(const key_compare& kComp = key_compare(),
-               const allocator_type& alloc = allocator_type())
-    : _tree(BST(kComp, alloc)),
-      _kComp(this->_tree->get_key_comparator()),
-      _comp(this->_tree->get_value_comparator()),
-      _alloc(this->_tree->get_allocator()) {}
+               const allocator_type& alloc = allocator_type()) : _tree(kComp, alloc), _kComp(kComp), _comp(kComp), _alloc(alloc) {
+    //  this->_kComp = this->_tree.get_key_comparator();
+    //  this->_comp = this->_tree.get_value_comparator();
+    //  this->_alloc = this->_tree.get_allocator();
+  }
 
   // range (2)
   template <class InputIterator>
     map(InputIterator first, InputIterator last,
          const key_compare& kComp = key_compare(),
-         const allocator_type& alloc = allocator_type())
-    : _tree(BST(kComp, alloc)),
-      _kComp(this->_tree->get_key_comparator()),
-      _comp(this->_tree->get_comparator()),
-      _alloc(this->_tree->get_comparator()) {
-    for (InputIterator it = first; it != last; ++it)
-      this->insert(*it);
-  }
+         const allocator_type& alloc = allocator_type()) : _tree(kComp, alloc), _kComp(kComp), _comp(kComp), _alloc(alloc) {
+      // this->_kComp = this->_tree.get_key_comparator();
+      // this->_comp = this->_tree.get_value_comparator();
+      // this->_alloc = this->_tree.get_allocator();
+      for (InputIterator it = first; it != last; ++it)
+        this->insert(*it);
+    }
 
   // copy (3)
   map(const map& x)
@@ -62,7 +61,7 @@ class map {
       _comp(x._comp), _alloc(x._alloc) {}
 
 // Map destructor (public member function )
-  ~map();
+  ~map() {}
 
 // Copy container content (public member function )
   map& operator= (const map& x) {
@@ -90,7 +89,7 @@ class map {
   bool empty() const { return this->_tree.empty(); }
 
   // Return container size (public member function )
-  size_type size() const { return this->_tree.get_size() };
+  size_type size() const { return this->_tree.get_size(); };
 
   // Return maximum size (public member function )
   size_type max_size() const { return this->_alloc.max_size(); }
@@ -106,18 +105,19 @@ class map {
 
   // Insert elements (public member function )
   pair<iterator,bool> insert (const value_type& val) {
-    pair<bst_node_type*, bool> insertResult = this->_tree->insert(val);
-    return make_pair(iterator(*this, insertResult.first), insertResult.second);
+    pair<bst_node_type*, bool> insertResult = this->_tree.insert(val);
+    return make_pair(iterator(this->_tree, insertResult.first), insertResult.second);
   }
 
   // MEILLEUR MOYEN ?
   iterator insert(iterator position, const value_type& val) {
+    (void)position;
     pair<bst_node_type*, bool> insertResult = this->_tree->insert(val);
     return iterator(*this, insertResult.first);
   }
 
   template <class InputIterator>  void insert(InputIterator first, InputIterator last) {
-    for (InputIterator it = first; it != end; ++it) {
+    for (InputIterator it = first; it != last; ++it) {
       insert(*it);
     }
   }
@@ -185,22 +185,22 @@ class map {
   pair<const_iterator,const_iterator> equal_range (const key_type& k) const {
     return pair<const_iterator, const_iterator>(this->_tree->equal_range(k));
   }
-  pair<iterator,iterator>             equal_range (const key_type& k); {
+  pair<iterator,iterator>             equal_range (const key_type& k) {
     return pair<iterator, iterator>(this->_tree->equal_range(k));
   }
 
 // Allocator
 
   // Get allocator (public member function )
-  allocator_type get_allocator() const { return this->_tree.get};
+  allocator_type get_allocator() const { return this->_tree.get_allocator(); }
 
   class value_compare
-  {   // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
+  {
     friend class map;
   protected:
     KeyCompare comp;
-    value_compare (KeyCompare c) : comp(c) {}  // constructed with map's comparison object
   public:
+    value_compare (KeyCompare c) : comp(c) {}
     typedef bool result_type;
     typedef value_type first_argument_type;
     typedef value_type second_argument_type;
@@ -210,7 +210,7 @@ class map {
   };
 
   template <class IteratorType>
-    class Iterator<IteratorType> {
+    class Iterator {
    public:
     typedef std::bidirectional_iterator_tag iterator_category;
     typedef std::ptrdiff_t difference_type;
@@ -218,8 +218,8 @@ class map {
     typedef Alloc allocator_type;
     typedef IteratorType* pointer;
     typedef IteratorType& reference;
-    typedef BST<value_type, value_compare, allocator_type> bst_type;
-    typedef BST<value_type, value_compare, allocator_type>::Node node_type;
+    typedef BST<key_type, mapped_type, key_compare, value_compare, allocator_type>       bst_type;
+    typedef typename BST<key_type, mapped_type, key_compare, value_compare, allocator_type>::Node bst_node_type;
 
     Iterator(bst_type const & bst, bool isEnd) : bst(bst), isEnd(isEnd) {
       if (bst.root == NULL || isEnd)
@@ -228,7 +228,7 @@ class map {
         this->current = bst.root->leftmost_child();
     }
 
-    Iterator(bst_type &bst, node_type *node) : bst(bst), isEnd(node != NULL) {
+    Iterator(bst_type &bst, bst_node_type *node) : bst(bst), isEnd(node != NULL) {
       this->current = node;
     }
 
@@ -241,8 +241,8 @@ class map {
     reference operator*() const { return *current->get_value(); }
     reference operator->() const { return current->get_value(); }
     Iterator &operator++() {
-      Node *n = this->current->next();
-      if (n != NULL);
+      bst_node_type *n = this->current->next();
+      if (n != NULL)
         this->current = n;
       else
         this->isEnd = true;
@@ -270,16 +270,16 @@ class map {
     friend bool operator!=(Iterator const &a, Iterator const &b) { return a.current != b.current; };
 
    private:
-    node_type *current;
+    bst_node_type *current;
     bst_type const & bst;
     bool isEnd;
   };
 
  private:
-  BST<value_type, key_compare, value_compare, allocator_type> _tree;
-  key_compare &_kComp;
-  value_compare &_comp;
-  allocator_type &_alloc;
+  BST<key_type, mapped_type, key_compare, value_compare, allocator_type> _tree;
+  key_compare _kComp;
+  value_compare _comp;
+  allocator_type _alloc;
 };
 
 

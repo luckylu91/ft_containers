@@ -99,7 +99,6 @@ class BST {
     static Node *insert(Node *p, value_type const &new_val, BST &bst) {
       // std::cout << "Inserting " << new_val << std::endl;
       if (p == NULL) {
-        bst.size++;
         return new Node(new_val, bst.comp, bst.alloc);
       }
       if (new_val < *p) {
@@ -115,7 +114,7 @@ class BST {
         p->oneWasAdded = p->right->oneWasAdded;
       }
       else {
-        *p->value = new_val;
+        p->value->second = new_val.second;
         p->lastAdded = p;
         p->oneWasAdded = false;
         return p;
@@ -174,10 +173,10 @@ class BST {
     static Node *find(Node *p, key_type const & kVal) {
       if (p == NULL)
         return NULL;
-      if (val < *p) {
+      if (kVal < *p) {
         return Node::find(p->left, kVal);
       }
-      else if (val > *p) {
+      else if (kVal > *p) {
         return Node::find(p->right, kVal);
       }
       else {
@@ -362,10 +361,15 @@ class BST {
 
   BST(const key_compare& kComp = key_compare(),
       allocator_type const & alloc = allocator_type())
-    : root(NULL), kComp(kComp), comp(value_compare(kComp)), alloc(alloc) {}
+    : root(NULL), kComp(kComp), comp(kComp), alloc(alloc) {}
 
-  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.comp), alloc(x.alloc) {
+  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.kComp), alloc(x.alloc) {
     this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
+  }
+
+  ~BST() {
+    this->clear();
+    this->root = NULL;
   }
 
   pair<Node*, bool> insert(value_type const & new_val) {
@@ -433,6 +437,10 @@ class BST {
     this->clear();
     this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
   }
+
+  allocator_type get_allocator() const { return this->alloc; };
+  value_compare get_key_comparator() const { return this->kComp; };
+  value_compare get_value_comparator() const { return this->comp; };
 
   void _print() {
     if (root != NULL)

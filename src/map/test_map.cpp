@@ -15,8 +15,12 @@ int main()
   mapInt m;
 
   srand(time(NULL));
-  for (int i = 0; i < 15; ++i)
+  for (int i = 0; i < 15; ++i) {
+    std::cout << i << std::endl;
     m.insert(make_pair(i, i));
+  }
+  // m.insert(make_pair(1, 1));
+
 
   // for (int i = 0; i < 5; i++) {
   //   int val = rand() % m.getSize();

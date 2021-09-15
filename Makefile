@@ -3,10 +3,10 @@ cgreen="\033[0;32m"
 cend="\033[0;0m"
 
 CC =	clang++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. #-fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. -fsanitize=address -g3
 SHELL = /bin/bash
 # SRCS =	vector_iterator.cpp
-SUBDIRS = vect
+SUBDIRS = vect map
 SUBDIRS_BIN = $(addprefix bin/, $(SUBDIRS))
 VECT_SRCS =	$(addprefix src/vect/,\
 	vector_iterator.cpp \
@@ -25,10 +25,10 @@ all:	$(BINS)
 echo:
 	@echo $(BINS)
 
-bin/%:	src/%.cpp
+bin/%:	src/%.cpp | $(SUBDIRS_BIN)
 	$(CC) -o $@ $< $(CFLAGS)
 
-$(BINS):	$(INC) | $(SUBDIRS_BIN)
+$(BINS):	$(INC)
 
 $(SUBDIRS_BIN):
 	mkdir -p $(SUBDIRS_BIN)
