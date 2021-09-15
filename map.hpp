@@ -46,9 +46,10 @@ class map {
   // range (2)
   template <class InputIterator>
     map(InputIterator first, InputIterator last,
-         const key_compare& comp = key_compare(),
+         const key_compare& kComp = key_compare(),
          const allocator_type& alloc = allocator_type())
-    : _tree(BST(comp, alloc)),
+    : _tree(BST(kComp, alloc)),
+      _kComp(this->_tree->get_key_comparator()),
       _comp(this->_tree->get_comparator()),
       _alloc(this->_tree->get_comparator()) {
     for (InputIterator it = first; it != last; ++it)
@@ -56,13 +57,17 @@ class map {
   }
 
   // copy (3)
-  map(const map& x);
+  map(const map& x)
+    : _tree(x._tree), _kComp(x._kComp),
+      _comp(x._comp), _alloc(x._alloc) {}
 
 // Map destructor (public member function )
   ~map();
 
 // Copy container content (public member function )
-  map& operator= (const map& x);
+  map& operator= (const map& x) {
+    this->_tree = x._tree;
+  }
 
 // Iterators
 
@@ -120,18 +125,28 @@ class map {
   // Erase elements (public member function )
   void erase (iterator position) {
     key_type &k = position->first;
-    
+    this->_tree.remove(k);
   }
 
   size_type erase (const key_type& k) {
     this->_tree.remove(k);
   }
 
-  void erase (iterator first, iterator last);
+  void erase (iterator first, iterator last) {
+    for (iterator it = first; it != last; ++it) {
+      this->erase(it);
+    }
+  }
+
   // Swap content (public member function )
-  void swap (map& x);
+  void swap (map &x) {
+    this->_tree.swap(x._tree);
+  }
+
   // Clear content (public member function )
-  void clear();
+  void clear() {
+    this->_tree.clear();
+  }
 
 // Observers
 

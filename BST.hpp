@@ -16,122 +16,7 @@ class BST {
   typedef KeyCompare key_compare;
   typedef ValueCompare value_compare;
   typedef Alloc allocator_type;
-  class Node;
 
-  BST(const key_compare& kComp = key_compare(),
-      allocator_type const & alloc = allocator_type())
-    : root(NULL), kComp(kComp), comp(value_compare(kComp)), alloc(alloc) {}
-
-  pair<Node*, bool> insert(value_type const & new_val) {
-    this->root = Node::insert(this->root, new_val, *this);
-    Node *lastAdded = this->root->get_last_added();
-    bool oneWasAdded = this->root->get_one_was_added();
-    return make_pair<Node*, bool>(lastAdded, oneWasAdded);
-  }
-
-  void remove(value_type const & val) {
-    this->root = Node::remove(this->root, val, *this);
-    if (this->root != NULL)
-      this->root->update_height();
-  }
-
-  Node *find(key_type const &kVal) {
-      return Node::find(this->root, kVal);
-  }
-
-  mapped_type &find_or_insert(key_type const &kVal) {
-    Node *n = Node::find(this->root, kVal);
-    if (n != NULL) {
-      return n->value.second;
-    }
-    else {
-      this->insert(make_pair(kVal, mapped_type())); // BOF
-      return this->root->get_last_added()->value->second;
-    }
-  }
-
-  Node *lower_bound(key_type const &kVal) const {
-    return Node::lower_bound(this->root, kVal);
-  }
-
-  Node *upper_bound(key_type const &kVal) const {
-    return Node::upper_bound(this->root, kVal);
-  }
-
-  pair<Node*, Node*> equal_range(key_type const &k) {
-    Node *n = this->lower_bound(k);
-    if (*n == k) {
-      return make_pair(n, n->next());
-    }
-    return make_pair(n, n);
-  }
-
-  bool empty() {
-    return this->root == NULL;
-  }
-
-  size_t get_size() {
-    return Node::get_size(this->root);
-  }
-
-  void _print() {
-    if (root != NULL)
-      root->_print();
-    std::cout << "END" << std::endl;
-  }
-
-
- public:
-  // void _fillMatrixRepr(int **matrix, int h, Node *n, int inv_height, int *indices) {
-  //   if (n == NULL)
-  //     return;
-  //   _fillMatrixRepr(matrix, h, n->left, inv_height + 1, indices);
-  //   matrix[inv_height][indices[inv_height]] = *n->get_value();
-  //   indices[inv_height]++;
-  //   _fillMatrixRepr(matrix, h, n->right, inv_height + 1, indices);
-  // }
-
-  // void _printNSpaces(int n) {
-  //   for (int i = 0; i < n; i++) {
-  //     std::cout << " ";
-  //   }
-  // }
-
-  // size_t _findMaxNumberLenght(int **matrix,  int h, int *indices) {
-  //   size_t maxLength = 0;
-  //   for (int i = 0; i < h; i++) {
-  //     for (int j = 0; j < indices[i]; j++) {
-  //       maxLength = std::max(maxLength, std::to_string(matrix[i][j]).length());
-  //     }
-  //   }
-  //   return maxLength;
-  // }
-
-  // // Multiply distances with max { strlen(itoa(value)) }
-  // void _prettyPrint() {
-  //   // int numberLeaves = _numberOfLeaves(this->root);
-  //   int height = Node::node_height(this->root);
-  //   int numberLeaves = 1 << height;
-  //   int **matrix = new int*[height];
-  //   for (int i = 0; i < height; i++) {
-  //     matrix[i] = new int[numberLeaves]();
-  //   }
-  //   int *indices = new int[height]();
-  //   _fillMatrixRepr(matrix, height, this->root, 0, indices);
-  //   int maxLength = static_cast<int>(_findMaxNumberLenght(matrix, height, indices));
-  //   for (int i = 0; i < height; i++) {
-  //     int nH = height - 1 - i;
-  //     _printNSpaces(((1 << nH) - 1) * maxLength);
-  //     for (int j = 0; j < indices[i]; j++) {
-  //       std::cout << std::setw(maxLength) << matrix[i][j];
-  //       if (j < indices[i] - 1)
-  //         _printNSpaces(((1 << (nH + 1)) - 1) * maxLength);
-  //     }
-  //     std::cout << std::endl;
-  //   }
-  // }
-
- public:
   struct Node {
     Node(value_type const & val, value_compare & comp, allocator_type & alloc)
       : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), comp(comp), alloc(alloc), oneWasAdded(true) {
@@ -140,24 +25,10 @@ class BST {
         lastAdded = this;
     }
 
-    // Node(key_type const & kVal, value_compare & comp, allocator_type & alloc)
-    //   : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), comp(comp), alloc(alloc), oneWasAdded(true) {
-    //     this->value = this->alloc.allocate(1);
-    //     this->value->first = kVal;
-    //     this->value->second = mapped_type();
-    //     lastAdded = this;
-    // }
-
     ~Node() {
       alloc.destroy(this->value);
       alloc.deallocate(this->value, 1);
     }
-
-    // void setChild(Node *n, int dir) {
-    //   this->_child[dir] = n;
-    //   if (n != NULL)
-    //     n->_parent = this;
-    // }
 
     static void set_parent(Node *n, Node *p) {
       if (n != NULL)
@@ -263,10 +134,6 @@ class BST {
       delete p;
       return temp;
     }
-
-    // static Node* remove_in_child(Node *p, bool isLeft) {
-
-    // }
 
     // TODO balance
     static Node *remove(Node *p, value_type const &val, BST &bst) {
@@ -374,7 +241,7 @@ class BST {
 
     // Node *median() {
     //   return this->getIndex(this->getSize() / 2);
-    }
+    // }
 
     Node *leftmost_child() const {
       if (this->left == NULL)
@@ -430,10 +297,30 @@ class BST {
     }
 
     static int node_height(Node *n) { return n == NULL ? 0 : n->height; }
+
+    void update_height() { this->height = 1 + std::max(node_height(this->left), node_height(this->right)); }
+
+    static void clear(Node *p) {
+      if (p == NULL)
+        return ;
+      clear(p->left);
+      clear(p->right);
+      delete p;
+    }
+
+    static Node *deepcopy(Node const *p, Node const *pCopyParent, value_compare & comp, allocator_type & alloc) {
+      if (p == NULL)
+        return (NULL);
+      Node *pCopy = new Node(*p->value, comp, alloc);
+      pCopy->parent = pCopyParent;
+      pCopy->height = p->height;
+      pCopy->left = deepcopy(p->left, pCopy, comp, alloc);
+      pCopy->right = deepcopy(p->right, pCopy, comp, alloc);
+    }
+
     int get_balance() { return node_height(this->left) - node_height(this->right); }
     Node *get_last_added() { return this->lastAdded; }
     bool get_one_was_added() { return this->oneWasAdded; }
-    void update_height() { this->height = 1 + std::max(node_height(this->left), node_height(this->right)); }
     allocator_type get_allocator() const { return this->alloc; };
     value_compare get_key_comparator() const { return this->kComp; };
     value_compare get_value_comparator() const { return this->comp; };
@@ -472,11 +359,97 @@ class BST {
     bool oneWasAdded;
   };
 
+
+  BST(const key_compare& kComp = key_compare(),
+      allocator_type const & alloc = allocator_type())
+    : root(NULL), kComp(kComp), comp(value_compare(kComp)), alloc(alloc) {}
+
+  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.comp), alloc(x.alloc) {
+    this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
+  }
+
+  pair<Node*, bool> insert(value_type const & new_val) {
+    this->root = Node::insert(this->root, new_val, *this);
+    Node *lastAdded = this->root->get_last_added();
+    bool oneWasAdded = this->root->get_one_was_added();
+    return make_pair<Node*, bool>(lastAdded, oneWasAdded);
+  }
+
+  void remove(value_type const & val) {
+    this->root = Node::remove(this->root, val, *this);
+    if (this->root != NULL)
+      this->root->update_height();
+  }
+
+  Node *find(key_type const &kVal) {
+      return Node::find(this->root, kVal);
+  }
+
+  mapped_type &find_or_insert(key_type const &kVal) {
+    Node *n = Node::find(this->root, kVal);
+    if (n != NULL) {
+      return n->value.second;
+    }
+    else {
+      this->insert(make_pair(kVal, mapped_type())); // BOF
+      return this->root->get_last_added()->value->second;
+    }
+  }
+
+  Node *lower_bound(key_type const &kVal) const {
+    return Node::lower_bound(this->root, kVal);
+  }
+
+  Node *upper_bound(key_type const &kVal) const {
+    return Node::upper_bound(this->root, kVal);
+  }
+
+  pair<Node*, Node*> equal_range(key_type const &k) {
+    Node *n = this->lower_bound(k);
+    if (*n == k) {
+      return make_pair(n, n->next());
+    }
+    return make_pair(n, n);
+  }
+
+  size_t get_size() {
+    return Node::get_size(this->root);
+  }
+
+  void swap(BST &x) {
+    std::swap(this->root, x.root);
+  }
+
+  void clear() {
+    Node::clear(this->root);
+    this->root = NULL;
+  }
+
+  bool empty() {
+    return this->root == NULL;
+  }
+
+  BST &operator=(BST const &x) {
+    this->clear();
+    this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
+  }
+
+  void _print() {
+    if (root != NULL)
+      root->_print();
+    std::cout << "END" << std::endl;
+  }
+
  private:
+
   Node *root;
   key_compare kComp;
   value_compare comp;
   allocator_type alloc;
+};
+
+
+// ITERATOR
 
 //   struct NodeList {
 //     NodeList(Node *head, NodeList *tail) : head(head), tail(tail) {}
@@ -618,5 +591,53 @@ class BST {
 //     bool reverse;
 //   };
 
-};
+// PRINT
 
+  // void _fillMatrixRepr(int **matrix, int h, Node *n, int inv_height, int *indices) {
+  //   if (n == NULL)
+  //     return;
+  //   _fillMatrixRepr(matrix, h, n->left, inv_height + 1, indices);
+  //   matrix[inv_height][indices[inv_height]] = *n->get_value();
+  //   indices[inv_height]++;
+  //   _fillMatrixRepr(matrix, h, n->right, inv_height + 1, indices);
+  // }
+
+  // void _printNSpaces(int n) {
+  //   for (int i = 0; i < n; i++) {
+  //     std::cout << " ";
+  //   }
+  // }
+
+  // size_t _findMaxNumberLenght(int **matrix,  int h, int *indices) {
+  //   size_t maxLength = 0;
+  //   for (int i = 0; i < h; i++) {
+  //     for (int j = 0; j < indices[i]; j++) {
+  //       maxLength = std::max(maxLength, std::to_string(matrix[i][j]).length());
+  //     }
+  //   }
+  //   return maxLength;
+  // }
+
+  // // Multiply distances with max { strlen(itoa(value)) }
+  // void _prettyPrint() {
+  //   // int numberLeaves = _numberOfLeaves(this->root);
+  //   int height = Node::node_height(this->root);
+  //   int numberLeaves = 1 << height;
+  //   int **matrix = new int*[height];
+  //   for (int i = 0; i < height; i++) {
+  //     matrix[i] = new int[numberLeaves]();
+  //   }
+  //   int *indices = new int[height]();
+  //   _fillMatrixRepr(matrix, height, this->root, 0, indices);
+  //   int maxLength = static_cast<int>(_findMaxNumberLenght(matrix, height, indices));
+  //   for (int i = 0; i < height; i++) {
+  //     int nH = height - 1 - i;
+  //     _printNSpaces(((1 << nH) - 1) * maxLength);
+  //     for (int j = 0; j < indices[i]; j++) {
+  //       std::cout << std::setw(maxLength) << matrix[i][j];
+  //       if (j < indices[i] - 1)
+  //         _printNSpaces(((1 << (nH + 1)) - 1) * maxLength);
+  //     }
+  //     std::cout << std::endl;
+  //   }
+  // }
