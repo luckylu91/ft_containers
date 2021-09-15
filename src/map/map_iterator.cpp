@@ -3,11 +3,17 @@
 
 typedef ft::map<int, int> intBST;
 
+template <class C1, class C2>
+std::ostream & operator<<(std::ostream & os, pair<C1, C2> const & p) {
+  os << "(" << p.first << "," << p.second << ")";
+  return os;
+}
+
 void test_iterator_types() {
   intBST bst;
 
   for (int i = 0; i < 15; ++i)
-      bst.insert(i);
+    bst.insert(make_pair(i, i));
 
   std::cout << "Mutable iterator" << std::endl;
   for (intBST::iterator it = bst.begin(); it != bst.end(); ++it)
@@ -42,42 +48,13 @@ void test_iterator_methods(InputIterator it) {
   std::cout << "it++ = " << *(it++) << ", now *it = " << *it << std::endl;
   // operator--
   std::cout << "--it = " << *(--it) << ", now *it = " << *it << std::endl;
-  // operator--
+  // operator--(int)
   std::cout << "it-- = " << *(it--) << ", now *it = " << *it << std::endl;
-  // operator[]
-  std::cout << "it[0] = " << it[0] << ", it[2] = " << it[2] << std::endl;
-  // operator+=
-  std::cout << "it += 2, now *it = " << *(it += 2) << std::endl;
-  // operator-=
-  std::cout << "it -= 1, now *it = " << *(it -= 1) << std::endl;
-  // operator-
-  std::cout << "*(it - 1) = " << *(it - 1) << std::endl;
-  // operator+
-  std::cout << "*(it + 1) = " << *(it + 1) << std::endl;
-  // operator+
-  std::cout << "*(1 + it) = " << *(1 + it) << std::endl;
-  // operator-
-  std::cout << "*(it - (it + 2)) = " << (it - (it + 2)) << std::endl;
-  std::cout << "*(it - (it - 1)) = " << (it - (it - 1)) << std::endl;
   std::boolalpha(std::cout);
   // operator==
   std::cout << "it == it : " << (it == it) << std::endl;
-  std::cout << "it == (it + 1) : " << (it == (it + 1)) << std::endl;
   // operator!=
-  std::cout << "it != (it + 1) : " << (it != (it + 1)) << std::endl;
   std::cout << "it != it : " << (it != it) << std::endl;
-  // operator<
-  std::cout << "it < it : " << (it < it) << std::endl;
-  std::cout << "it < (it + 1) : " << (it < (it + 1)) << std::endl;
-  // operator>
-  std::cout << "it > it : " << (it > it) << std::endl;
-  std::cout << "it > (it - 1) : " << (it > (it - 1)) << std::endl;
-  // operator<=
-  std::cout << "it <= it : " << (it <= it) << std::endl;
-  std::cout << "it <= (it + 1) : " << (it <= (it + 1)) << std::endl;
-  // operator>=
-  std::cout << "it >= it : " << (it >= it) << std::endl;
-  std::cout << "it >= (it - 1) : " << (it >= (it - 1)) << std::endl;
   std::noboolalpha(std::cout);
 }
 
@@ -85,7 +62,7 @@ int main() {
   intBST bst;
 
   for (int i = 0; i < 15; ++i)
-      bst.insert(i);
+    bst.insert(make_pair(i, i));
 
   intBST const cbst(bst);
   // test_iterator_types();
@@ -94,4 +71,6 @@ int main() {
   std::cout << std::endl;
   std::cout << "map::const_iterator" << std::endl << std::endl;
   test_iterator_methods(cbst.begin());
+
+  test_iterator_types();
 }
