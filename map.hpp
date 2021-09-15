@@ -24,8 +24,8 @@ class map {
   typedef typename allocator_type::const_reference const_reference;
   typedef typename allocator_type::pointer pointer;
   typedef typename allocator_type::const_pointer const_pointer;
-  typedef Iterator<mapped_type> iterator;
-  typedef Iterator<const mapped_type> const_iterator;
+  typedef Iterator<value_type> iterator;
+  typedef Iterator<const value_type> const_iterator;
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
   typedef typename allocator_type::difference_type difference_type;
@@ -118,7 +118,10 @@ class map {
   }
 
   // Erase elements (public member function )
-  void erase (iterator position);
+  void erase (iterator position) {
+    key_type &k = position->first;
+    
+  }
 
   size_type erase (const key_type& k) {
     this->_tree.remove(k);
@@ -133,9 +136,9 @@ class map {
 // Observers
 
   // Return key comparison object (public member function )
-  key_compare key_comp() const;
+  key_compare key_comp() const { return this->_kComp; }
   // Return value comparison object (public member function )
-  value_compare value_comp() const;
+  value_compare value_comp() const { return this->_comp; }
 
 // Operations
 
@@ -151,14 +154,25 @@ class map {
   }
 
   // Count elements with a specific key (public member function )
-  size_type count (const key_type& k) const;
+  size_type count (const key_type& k) const {
+    return this->find(k) == this->end() ? 0 : 1;
+  };
+
   // Return iterator to lower bound (public member function )
-  iterator lower_bound (const key_type& k);const_iterator lower_bound (const key_type& k) const;
+  iterator lower_bound (const key_type& k)             { return iterator(this->_tree->lower_bound(k)); }
+  const_iterator lower_bound (const key_type& k) const { return const_iterator(this->_tree->lower_bound(k)); }
+
   // Return iterator to upper bound (public member function )
-  iterator upper_bound (const key_type& k);const_iterator upper_bound (const key_type& k) const;
+  iterator upper_bound (const key_type& k)             { return iterator(this->_tree->upper_bound(k)); }
+  const_iterator upper_bound (const key_type& k) const { return const_iterator(this->_tree->upper_bound(k)); }
+
   // Get range of equal elements (public member function )
-  pair<const_iterator,const_iterator> equal_range (const key_type& k) const;
-  pair<iterator,iterator>             equal_range (const key_type& k);
+  pair<const_iterator,const_iterator> equal_range (const key_type& k) const {
+    return pair<const_iterator, const_iterator>(this->_tree->equal_range(k));
+  }
+  pair<iterator,iterator>             equal_range (const key_type& k); {
+    return pair<iterator, iterator>(this->_tree->equal_range(k));
+  }
 
 // Allocator
 
@@ -244,8 +258,6 @@ class map {
     node_type *current;
     bst_type const & bst;
     bool isEnd;
-
-    void setTo
   };
 
  private:

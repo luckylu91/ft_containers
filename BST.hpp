@@ -50,6 +50,22 @@ class BST {
     }
   }
 
+  Node *lower_bound(key_type const &kVal) const {
+    return Node::lower_bound(this->root, kVal);
+  }
+
+  Node *upper_bound(key_type const &kVal) const {
+    return Node::upper_bound(this->root, kVal);
+  }
+
+  pair<Node*, Node*> equal_range(key_type const &k) {
+    Node *n = this->lower_bound(k);
+    if (*n == k) {
+      return make_pair(n, n->next());
+    }
+    return make_pair(n, n);
+  }
+
   bool empty() {
     return this->root == NULL;
   }
@@ -154,6 +170,7 @@ class BST {
     }
 
     static Node *rotate_left(Node *x) {
+      Node *xOldParent = x->parent;
       Node *y = x->right;
       Node *yL = y->left;
 
@@ -164,10 +181,12 @@ class BST {
 
       x->update_height();
       y->update_height();
+      set_parent(y, xOldParent);
       return y;
     }
 
     static Node *rotate_right(Node *y) {
+      Node *yOldParent = y->parent;
       Node *x = y->left;
       Node *xR = x->right;
 
@@ -178,7 +197,31 @@ class BST {
 
       x->update_height();
       y->update_height();
+      set_parent(x, yOldParent);
       return x;
+    }
+
+    static Node *do_rebalance_cases(Node *p, bool isLeft1, bool isLeft2) {
+      // Left Left Case
+      if (isLeft1 && isLeft2) {
+        return rotate_left(p);
+      }
+      // Left Right Case
+      else if (isLeft1 && !isLeft2) {
+        p->left = rotate_left(p->left);
+        Node::set_parent(p->left, p);
+        return rotate_right(p);
+      }
+      // Right Left Case
+      else if (!isLeft1 && isLeft2) {
+        p->right = rotate_right(p->right);
+        Node::set_parent(p->right, p);
+        return rotate_left(p);
+      }
+      // Right Right Case
+      else {
+        return rotate_left(p);
+      }
     }
 
     // returns the new root in stead of "p"
@@ -208,27 +251,8 @@ class BST {
       }
       p->update_height();
       int balance = p->get_balance();
-      // Left Left Case
-      if (balance > 1 && new_val < *p->left) {
-        return rotate_left(p);
-      }
-      // Left Right Case
-      else if (balance > 1 && new_val > *p->left) {
-        p->left = rotate_left(p->left);
-        Node::set_parent(p->left, p);
-        return rotate_right(p);
-      }
-      // Right Left Case
-      else if (balance < -1 && new_val < *p->right) {
-        p->right = rotate_right(p->right);
-        Node::set_parent(p->right, p);
-        return rotate_left(p);
-      }
-      // Right Right Case
-      else if (balance < -1 && new_val > *p->right) {
-        return rotate_left(p);
-      }
-      return p;
+      Node *child = balance > 1 ? p->left : p->right;
+      return Node::do_rebalance_cases(p, balance > 1, new_val < *child);
     }
 
     static Node *move_only_child_up(Node *p) {
@@ -240,9 +264,9 @@ class BST {
       return temp;
     }
 
-    static Node* remove_in_child(Node *p, bool isLeft) {
+    // static Node* remove_in_child(Node *p, bool isLeft) {
 
-    }
+    // }
 
     // TODO balance
     static Node *remove(Node *p, value_type const &val, BST &bst) {
@@ -250,17 +274,9 @@ class BST {
         return NULL;
       if (val < *p) {
         p->left = Node::remove(p->left, val, bst);
-        // if (p->left != NULL) {
-        //   p->left->parent = p;
-        //   p->left->update_height();
-        // }
       }
       else if (*p < val) {
         p->right = Node::remove(p->right, val, bst);
-        // if (p->right != NULL) {
-        //   p->right->parent = p;
-        //   p->right->update_height();
-        // }
       }
       else {
         if (p->left == NULL && p->right == NULL) {
@@ -277,10 +293,6 @@ class BST {
           Node *k = p->next();
           std::swap(p->value, k->value);
           p->right = Node::remove(p->right, val, bst);
-          // if (p->right != NULL) {
-          //   p->right->parent = p;
-          //   p->right->update_height();
-          // }
         }
       }
       p->update_height();
@@ -289,27 +301,7 @@ class BST {
       if (balance[0] >= -1 && balance[0] <= 1)
         return p;
       balance[1] = balance[0] > 1 ? p->left->get_balance() : p->right->get_balance();
-      // Left Left Case
-      if (balance[0] > 0 && balance[1] > 0) {
-        return rotate_left(p);
-      }
-      // Left Right Case
-      else if (balance[0] > 0 && balance[1] < 0) {
-        p->left = rotate_left(p->left);
-        Node::set_parent(p->left, p);
-        return rotate_right(p);
-      }
-      // Right Left Case
-      else if (balance[0] < 0 && balance[1] > 0) {
-        p->right = rotate_right(p->right);
-        Node::set_parent(p->right, p);
-        return rotate_left(p);
-      }
-      // Right Right Case
-      else if (balance[0] < 0 && balance[1] < 0) {
-        return rotate_left(p);
-      }
-      return p;
+      return Node::do_rebalance_cases(p, balance[0] > 0, balance[1] > 0);
     }
 
     static Node *find(Node *p, key_type const & kVal) {
@@ -324,6 +316,44 @@ class BST {
       else {
         return p;
       }
+    }
+
+    static Node *lower_bound(Node const *p, key_type const & kVal) {
+      if (p == NULL)
+        return NULL;
+      if (kVal < *p) {
+        if (p->left == NULL)
+          return p;
+        else
+          return lower_bound(p->left, kVal);
+      }
+      else if (*kVal > *p) {
+        if (p->right == NULL)
+          return p->next();
+        else
+          return lower_bound(p->right, kVal);
+      }
+      else
+        return p;
+    }
+
+    static Node *upper_bound(Node const *p, key_type const & kVal) {
+      if (p == NULL)
+        return NULL;
+      if (kVal < *p) {
+        if (p->left == NULL)
+          return p;
+        else
+          return upper_bound(p->left, kVal);
+      }
+      else if (*kVal > *p) {
+        if (p->right == NULL)
+          return p->next();
+        else
+          return upper_bound(p->right, kVal);
+      }
+      else
+        return p->next();
     }
 
     static size_t get_size(Node *p) {
@@ -346,27 +376,27 @@ class BST {
     //   return this->getIndex(this->getSize() / 2);
     }
 
-    Node *leftmost_child() {
+    Node *leftmost_child() const {
       if (this->left == NULL)
         return this;
       return this->left->leftmost_child();
     }
 
-    Node *rightmost_child() {
+    Node *rightmost_child() const {
       if (this->right == NULL)
         return this;
       return this->right->rightmost_child();
     }
 
-    bool is_left_child() {
+    bool is_left_child() const {
       return this->parent != NULL && this->parent->left == this;
     }
 
-    bool is_right_child() {
+    bool is_right_child() const {
       return this->parent != NULL && this->parent->right == this;
     }
 
-    Node *first_parent_left() {
+    Node *first_parent_left() const {
       if (this->parent == NULL)
         return NULL;
       if (this->is_left_child())
@@ -374,26 +404,26 @@ class BST {
       return this->parent->first_parent_left();
     }
 
-    Node *first_parent_right() {
+    Node *first_parent_right() const {
       if (this->parent == NULL)
         return NULL;
       if (this->is_right_child())
         return this->parent;
       return this->parent->first_parent_right();
     }
-    Node *get_root() {
+    Node *get_root() const {
       if (this->parent == NULL)
         return this;
       return this->parent->get_root();
     }
 
-    Node *next() {
+    Node *next() const {
       if (this->right != NULL)
         return this->right->leftmost_child();
       return this->first_parent_left();
     }
 
-    Node *previous() {
+    Node *previous() const {
       if (this->left != NULL)
         return this->left->rightmost_child();
       return this->first_parent_right();
@@ -428,6 +458,8 @@ class BST {
 
     friend bool operator>(value_type const & a, Node const & b) { return b.comp(*b.value, a); }
     friend bool operator>(key_type const & a, Node const & b) { return b.kComp(b.value->first, a); }
+
+    typedef enum {LEFT, RIGHT} branch_dir;
 
     value_type *value;
     Node *left;
