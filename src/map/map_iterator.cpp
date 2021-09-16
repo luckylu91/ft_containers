@@ -1,10 +1,4 @@
-#include "test.h"
-
-template <class C1, class C2>
-std::ostream & operator<<(std::ostream & os, pair<C1, C2> const & p) {
-  os << "(" << p.first << "," << p.second << ")";
-  return os;
-}
+#include "test_map.h"
 
 void test_iterator_types() {
   map<int, int> bst;

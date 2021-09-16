@@ -1,9 +1,11 @@
-cred="\033[0;31m"
-cgreen="\033[0;32m"
-cend="\033[0;0m"
+cred="\\033[0;31m"
+cgreen="\\033[0;32m"
+cend="\\033[0;0m"
+cup="\\033[1A"
+erase="\\033[1A\\033[2K"
 
 CC =clang++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. -Iinclude -fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. -Iinclude -fsanitize=leak -g3
 SHELL = /bin/bash
 # SUBDIRS = vect map
 SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
@@ -16,19 +18,20 @@ SUBDIRS_TEST = $(addprefix test/, $(SUBDIRS))
 # 	vector_reassign.cpp \
 # )
 # SRCS = $(VECT_SRCS)
-SRCS = $(TEST_SRCS) src/main.cpp
-OBJS = $(SRCS:src/%.cpp=obj/%.o)
-BINS = $(SRCS:src/%.cpp=bin/%)
-INC = vector.hpp
+OBJS =	$(TEST_SRCS:src/%.cpp=obj/%_mine.o) \
+				$(TEST_SRCS:src/%.cpp=obj/%_std.o) \
+				obj/main.o
+TESTS =	$(TEST_SRCS:src/%.cpp=test/%)
+INC =	pair.hpp \
+			vector.hpp \
+			map.hpp
 
-all:	$(BINS)
-	@for b in $(BINS); \
-		do echo -e $(cred) "Testing $$b" $(cend); \
-		exec $$b; \
-	done
+all:	fclean $(TESTS)
+map:	fclean $(filter test/map/%, $(TESTS))
+vect:	fclean $(filter test/vect/%, $(TESTS))
 
 echo:
-	@echo $(BINS)
+	@echo $(TESTS)
 
 $(SUBDIRS_OBJ):
 	@mkdir -p $(SUBDIRS_OBJ)
@@ -44,18 +47,22 @@ $(BINS):        | $(SUBDIRS_BIN)
 
 obj/%_mine.o: src/%.cpp
 	$(CC) -c -D MINE -o $@ $< $(CFLAGS)
+	@echo -en "$(erase)"
 
 obj/%_std.o: src/%.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
+	@echo -en "$(erase)"
 
 obj/main.o: src/main.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
+	@echo -en "$(erase)"
 
 bin/%:	obj/%.o obj/main.o | $(SUBDIRS_BIN)
 	$(CC) -o $@ $^ $(CFLAGS)
+	@echo -en "$(erase)"
 
 test/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
-	bash test.sh $@ $^
+	@bash test.sh $@ $^
 
 # clean:
 # 	rm -rf bin/
@@ -63,6 +70,7 @@ test/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
 fclean:
 	rm -rf bin/
 	rm -rf obj/
+	rm -rf test/
 
 re: fclean all
 

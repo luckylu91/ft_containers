@@ -127,7 +127,7 @@ class map {
   }
 
   size_type erase (const key_type& k) {
-    this->_tree.remove(k);
+    return this->_tree.remove(k);
   }
 
   void erase (iterator first, iterator last) {
@@ -195,15 +195,14 @@ class map {
   class value_compare
   {
     friend class map;
-  protected:
-    KeyCompare comp;
   public:
-    value_compare (KeyCompare c) : comp(c) {}
+    KeyCompare kComp;
+    value_compare (KeyCompare c) : kComp(c) {}
     typedef bool result_type;
     typedef value_type first_argument_type;
     typedef value_type second_argument_type;
     bool operator() (const value_type& x, const value_type& y) const {
-      return comp(x.first, y.first);
+      return kComp(x.first, y.first);
     }
   };
 
@@ -301,7 +300,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
 
   struct Node {
     Node(value_type const & val, value_compare & comp, allocator_type & alloc)
-      : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), comp(comp), alloc(alloc), oneWasAdded(true) {
+      : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), kComp(comp.kComp), comp(comp), alloc(alloc), oneWasAdded(true) {
         this->value = this->alloc.allocate(1);
         this->alloc.construct(this->value, val);
         lastAdded = this;
@@ -396,7 +395,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
         p->oneWasAdded = p->right->oneWasAdded;
       }
       else {
-        p->value->second = new_val.second;
         p->lastAdded = p;
         p->oneWasAdded = false;
         return p;
@@ -419,30 +417,31 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     }
 
     // TODO balance
-    static Node *remove(Node *p, value_type const &val, BST &bst) {
-      if (p == NULL)
+    static Node *remove(Node *p, key_type const &kVal, BST &bst) {
+      if (p == NULL) {
+        bst.oneWasRemoved = false;
         return NULL;
-      if (val < *p) {
-        p->left = Node::remove(p->left, val, bst);
       }
-      else if (*p < val) {
-        p->right = Node::remove(p->right, val, bst);
+      if (kVal < *p) {
+        p->left = Node::remove(p->left, kVal, bst);
+      }
+      else if (*p < kVal) {
+        p->right = Node::remove(p->right, kVal, bst);
       }
       else {
         if (p->left == NULL && p->right == NULL) {
           delete p;
-          bst.size--;
+          bst.oneWasRemoved = true;
           return NULL;
         }
         else if (p->left == NULL || p->right == NULL) {
-          bst.size--;
+          bst.oneWasRemoved = true;
           return Node::move_only_child_up(p);
         }
         else {
-          Node *p_parent = p->parent;
           Node *k = p->next();
           std::swap(p->value, k->value);
-          p->right = Node::remove(p->right, val, bst);
+          p->right = Node::remove(p->right, kVal, bst);
         }
       }
       p->update_height();
@@ -506,7 +505,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
         return p->next();
     }
 
-    static size_t get_size(Node *p) {
+    static size_t get_size(Node const *p) {
       if (p == NULL)
         return (0);
       return (1 + Node::get_size(p->left) + Node::get_size(p->right));
@@ -656,6 +655,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     Node *right;
     Node *parent;
     int height;
+    key_compare &kComp;
     value_compare &comp;
     allocator_type &alloc;
     Node *lastAdded;
@@ -665,9 +665,9 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
 
   BST(const key_compare& kComp = key_compare(),
       allocator_type const & alloc = allocator_type())
-    : root(NULL), kComp(kComp), comp(kComp), alloc(alloc) {}
+    : root(NULL), kComp(kComp), comp(kComp), alloc(alloc), oneWasRemoved(false) {}
 
-  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.kComp), alloc(x.alloc) {
+  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.kComp), alloc(x.alloc), oneWasRemoved(x.oneWasRemoved) {
     this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
   }
 
@@ -683,10 +683,11 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     return make_pair<Node*, bool>(lastAdded, oneWasAdded);
   }
 
-  void remove(value_type const & val) {
-    this->root = Node::remove(this->root, val, *this);
+  size_type remove(key_type const & kVal) {
+    this->root = Node::remove(this->root, kVal, *this);
     if (this->root != NULL)
       this->root->update_height();
+    return this->oneWasRemoved ? 1 : 0;
   }
 
   Node *find(key_type const &kVal) {
@@ -720,7 +721,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     return make_pair(n, n);
   }
 
-  size_t get_size() {
+  size_t get_size() const {
     return Node::get_size(this->root);
   }
 
@@ -761,6 +762,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
   key_compare kComp;
   value_compare comp;
   allocator_type alloc;
+  bool oneWasRemoved;
 };
 
 

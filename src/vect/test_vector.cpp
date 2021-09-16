@@ -1,9 +1,4 @@
-#include "../../vector.hpp"
-// #include <vector>
-#include <iostream>
-#include <exception>
-
-using namespace ft;
+#include "test_vector.h"
 
 template <class Iterator>
 void iter(Iterator begin, Iterator end, void (*f)(typename Iterator::value_type&)) {
@@ -17,7 +12,7 @@ void printElem(T &elem) {
   std::cout << elem << " ";
 }
 
-int main() {
+void test() {
 	vector<int> vect(6, 1);
   vect.push_back(0);
   vect.push_back(1);

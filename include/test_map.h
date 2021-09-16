@@ -11,3 +11,9 @@
 #include <exception>
 
 void test();
+
+template <class C1, class C2>
+std::ostream & operator<<(std::ostream & os, pair<C1, C2> const & p) {
+  os << "(" << p.first << "," << p.second << ")";
+  return os;
+}

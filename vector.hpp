@@ -16,30 +16,93 @@
 
 namespace ft {
 
-// enable_if
-template <bool B, typename T = void> struct enable_if {};
-template <typename T> struct enable_if<true, T> { typedef T type; };
+// // enable_if
+// template <bool B, typename T = void> struct enable_if {};
+// template <typename T> struct enable_if<true, T> { typedef T type; };
+
+// // is_same
+// template<class T, class U>
+// struct is_same {
+//   static const bool value = false;
+// };
+// template<class T>
+// struct is_same<T, T> {
+//   static const bool value = true;
+// };
+
+// // is_iterator
+// template<typename T, typename = void>
+// struct is_iterator {
+//    static const bool value = false;
+// };
+// template<typename T>
+// struct is_iterator<T, typename enable_if<!is_same<typename T::iterator_category, void>::value, T>::type>
+// {
+//    static const bool value = true;
+// };
+
+// true_type
+struct true_type { static const bool value = true; };
+struct false_type { static const bool value = false; };
 
 // is_same
-template<class T, class U>
-struct is_same {
-  static const bool value = false;
-};
-template<class T>
-struct is_same<T, T> {
-  static const bool value = true;
+template <class U, class V> struct is_same : false_type {};
+template <class U> struct is_same<U, U> : true_type {};
+
+// // is_iterator
+// template <class Iter, class = void> struct is_iterator : false_type {};
+// template <class Iter> struct is_iterator<Iter, typename Iter::iterator_category> : true_type {};
+
+// // enable_if
+// template <bool B, class T> struct enable_if {};
+// template <class T> struct enable_if<true, T> { typedef T type; };
+
+// enable_if
+template <bool B> struct enable_if {};
+template <> struct enable_if<true> { typedef void type; };
+
+
+// enable_if_t
+template <bool B, class T> struct enable_if_t {};
+template <class T> struct enable_if_t<true, T> { typedef T type; };
+
+template <typename T>
+struct void_t_impl
+{
+  typedef void type;
 };
 
-// is_iterator
-template<typename T, typename = void>
-struct is_iterator {
-   static const bool value = false;
-};
-template<typename T>
-struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterator_traits<T>::value_type, void>::value>::type>
-{
-   static const bool value = true;
-};
+template <typename Iter, typename = void>
+  struct has_iterator_category
+  : false_type {};
+template <typename Iter>
+  struct has_iterator_category <Iter, typename void_t_impl<typename Iter::iterator_category>::type >
+  : true_type {};
+
+template <typename Iter, typename Trait, typename = void>
+  struct has_iterator_trait
+  : false_type {};
+template <typename Iter, typename Trait>
+  struct has_iterator_trait<Iter, Trait, typename enable_if< is_same<typename Iter::iterator_category, Trait>::value >::type>
+  : true_type {};
+
+template <typename Iter, typename = void>
+  struct is_iterator
+  : false_type {};
+template <typename Iter>
+  struct is_iterator<
+    Iter,
+    typename enable_if<
+        has_iterator_category<Iter>::value
+        && (   has_iterator_trait<Iter, std::input_iterator_tag>::value
+            || has_iterator_trait<Iter, std::output_iterator_tag>::value
+            || has_iterator_trait<Iter, std::forward_iterator_tag>::value
+            || has_iterator_trait<Iter, std::bidirectional_iterator_tag>::value
+            || has_iterator_trait<Iter, std::random_access_iterator_tag>::value
+        )
+      >::type
+    >
+  : true_type {};
 
 template <typename T, typename Alloc = std::allocator<T> >
 class vector {
@@ -75,7 +138,7 @@ class vector {
 
   template <class InputIterator>
   vector(InputIterator first,
-         typename enable_if<is_iterator<InputIterator>::value, InputIterator>::type last,
+         typename enable_if_t<is_iterator<InputIterator>::value, InputIterator>::type last,
          const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
     _allocate(MIN_CAPACITY);

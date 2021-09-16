@@ -1,8 +1,4 @@
-// #include <vector>
-#include "vector.hpp"
-#include <iostream>
-
-using namespace std;
+#include "test_vector.h"
 
 class A {
   static int _ccpt;
@@ -30,7 +26,7 @@ class A {
     m = new int(*(other.m));
     return *this;
   }
-  friend ostream & operator<<(ostream & os, A const & a) { os << "A(" << a._cpt << ")"; return os; }
+  friend std::ostream & operator<<(std::ostream & os, A const & a) { os << "A(" << a._cpt << ")"; return os; }
 };
 
 int A::_ccpt = 0;
@@ -38,13 +34,14 @@ int A::_ccpt = 0;
 template<class T> void print_and_sep(T const &t) { std::cout << t << ", "; }
 template<class Vect> void print_vect(Vect const &vect) {
   std::cout << "Vect(";
-  for_each(vect.begin(), vect.end() - 1, &print_and_sep<typename Vect::value_type>);
+  for(typename Vect::const_iterator it = vect.begin(); it != vect.end() - 1; ++it)
+    print_and_sep(*it);
   std::cout << *(vect.end() - 1) << ")" << std::endl;
 }
 
-int main()
+void test()
 {
-  ft::vector<A> vect;
+  vector<A> vect;
 
   vect.push_back(A());
   vect.push_back(A());

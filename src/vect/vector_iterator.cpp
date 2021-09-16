@@ -1,30 +1,28 @@
-#include <iostream>
-
-#include "vector.hpp"
+#include "test_vector.h"
 
 void test_iterator_types() {
-  ft::vector<int> intVect;
+  vector<int> intVect;
   for (int i = 0; i < 10; i++)
     intVect.push_back(i);
 
   std::cout << "Mutable iterator" << std::endl;
-  for (ft::vector<int>::iterator it = intVect.begin(); it != intVect.end(); ++it)
+  for (vector<int>::iterator it = intVect.begin(); it != intVect.end(); ++it)
     std::cout << *it << ", ";
   std::cout << "END" << std::endl;
 
   std::cout << "Mutable reverse iterator" << std::endl;
-  for (ft::vector<int>::reverse_iterator it = intVect.rbegin(); it != intVect.rend(); ++it)
+  for (vector<int>::reverse_iterator it = intVect.rbegin(); it != intVect.rend(); ++it)
     std::cout << *it << ", ";
   std::cout << "END" << std::endl;
 
-  ft::vector<int> const cIntVect(intVect);
+  vector<int> const cIntVect(intVect);
   std::cout << "Const iterator" << std::endl;
-  for (ft::vector<int>::const_iterator it = cIntVect.begin(); it != cIntVect.end(); ++it)
+  for (vector<int>::const_iterator it = cIntVect.begin(); it != cIntVect.end(); ++it)
     std::cout << *it << ", ";
   std::cout << "END" << std::endl;
 
   std::cout << "Reverse const iterator" << std::endl;
-  for (ft::vector<int>::const_reverse_iterator it = cIntVect.rbegin(); it != cIntVect.rend(); ++it)
+  for (vector<int>::const_reverse_iterator it = cIntVect.rbegin(); it != cIntVect.rend(); ++it)
     std::cout << *it << ", ";
   std::cout << "END" << std::endl;
 }
@@ -79,15 +77,16 @@ void test_iterator_methods(InputIterator it) {
   std::noboolalpha(std::cout);
 }
 
-int main() {
-  ft::vector<int> intVect;
+void test() {
+  vector<int> intVect;
   for (int i = 0; i < 10; i++)
     intVect.push_back(i);
-  ft::vector<int> const cIntVect(intVect);
-  // test_iterator_types();
+  vector<int> const cIntVect(intVect);
   std::cout << "vector::iterator" << std::endl << std::endl;
   test_iterator_methods(intVect.begin());
   std::cout << std::endl;
   std::cout << "vector::const_iterator" << std::endl << std::endl;
   test_iterator_methods(cIntVect.begin());
+
+  test_iterator_types();
 }

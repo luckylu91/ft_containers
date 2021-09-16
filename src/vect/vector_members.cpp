@@ -1,12 +1,9 @@
-#include "vector.hpp"
-#include <iostream>
-#include <iomanip>
+#include "test_vector.h"
 
-int main()
+void test()
 {
-	ft::vector<int> vect;
+	vector<int> vect;
 
-	// push_back, size, capacity
 	std::cout << "vector default (size, capacity): (" << vect.size() << ", " << vect.capacity() << ")" << std::endl;
 	for (int i = 0; i < 21; i++)
 	{

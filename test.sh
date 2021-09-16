@@ -6,11 +6,12 @@ NC='\033[0m' # No Color
 ERASE='\033[2K'
 
 TEST_NAME=$(echo $1 | cut -d/ -f2-)
-TEST_STDOUT_MINE="$1_out_mine"
-TEST_STDERR_MINE="$1_err_mine"
-TEST_STDOUT_STD="$1_out_std"
-TEST_STDERR_STD="$1_err_std"
+TEST_STDOUT_MINE="$1/out_mine"
+TEST_STDERR_MINE="$1/err_mine"
+TEST_STDOUT_STD="$1/out_std"
+TEST_STDERR_STD="$1/err_std"
 
+mkdir -p $1
 echo -n "Test $TEST_NAME..."
 
 $2 > $TEST_STDOUT_MINE 2> $TEST_STDERR_MINE
