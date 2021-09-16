@@ -55,14 +55,13 @@ void test_iterator_methods(InputIterator it) {
   std::noboolalpha(std::cout);
 }
 
-int main() {
+void test() {
   map<int, int> bst;
 
   for (int i = 0; i < 15; ++i)
     bst.insert(make_pair(i, i));
 
   map<int, int> const cbst(bst);
-  // test_iterator_types();
   std::cout << "map::iterator" << std::endl << std::endl;
   test_iterator_methods(bst.begin());
   std::cout << std::endl;

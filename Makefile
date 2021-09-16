@@ -10,12 +10,13 @@ SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
 TEST_SRCS = $(shell find src -mindepth 2 -type f | grep -v ".dSYM")
 SUBDIRS_OBJ = $(addprefix obj/, $(SUBDIRS))
 SUBDIRS_BIN = $(addprefix bin/, $(SUBDIRS))
+SUBDIRS_TEST = $(addprefix test/, $(SUBDIRS))
 # VECT_SRCS =	$(addprefix src/vect/,\
 # 	vector_iterator.cpp \
 # 	vector_reassign.cpp \
 # )
 # SRCS = $(VECT_SRCS)
-SRCS = $(TEST_SRCS) src/main.c
+SRCS = $(TEST_SRCS) src/main.cpp
 OBJS = $(SRCS:src/%.cpp=obj/%.o)
 BINS = $(SRCS:src/%.cpp=bin/%)
 INC = vector.hpp
@@ -30,14 +31,16 @@ echo:
 	@echo $(BINS)
 
 $(SUBDIRS_OBJ):
-	mkdir -p $(SUBDIRS_OBJ)
+	@mkdir -p $(SUBDIRS_OBJ)
 
 $(SUBDIRS_BIN):
-	mkdir -p $(SUBDIRS_BIN)
+	@mkdir -p $(SUBDIRS_BIN)
+
+$(SUBDIRS_TEST):
+	@mkdir -p $(SUBDIRS_TEST)
 
 $(OBJS): $(INC) | $(SUBDIRS_OBJ)
 $(BINS):        | $(SUBDIRS_BIN)
-
 
 obj/%_mine.o: src/%.cpp
 	$(CC) -c -D MINE -o $@ $< $(CFLAGS)
@@ -51,9 +54,8 @@ obj/main.o: src/main.cpp
 bin/%:	obj/%.o obj/main.o | $(SUBDIRS_BIN)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-%: bin/%_mine bin/%_std
-	echo $(word 1,$^)
-	echo $(word 2,$^)
+test/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
+	bash test.sh $@ $^
 
 # clean:
 # 	rm -rf bin/
