@@ -1,13 +1,6 @@
 #include "map.hpp"
 #include <functional>
 
-template <class T> void printNode(T *n) {
-  if (n == NULL)
-    std::cout << "NULL" << std::endl;
-  else {
-    std::cout << *n->value << std::endl;
-  }
-}
 
 int main()
 {
@@ -29,13 +22,5 @@ int main()
   //   // bst._print();
   //   m._prettyPrint();
   // }
-
-  // intBST::NodeIterator iter(bst);
-  // printNode(iter.current());
-  // iter.next();
-  // iter.next();
-  // printNode(iter.current());
-  // iter.previous();
-  // printNode(iter.current());
 
 }
