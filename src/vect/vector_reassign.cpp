@@ -41,7 +41,9 @@ template<class Vect> void print_vect(Vect const &vect) {
 
 void test()
 {
-  vector<A> vect(5);
+  vector<A> vect;
+
+  vect.reserve(5);
 
   std::cout << "--- push_back x 4 ---" << std::endl;
   vect.push_back(A());

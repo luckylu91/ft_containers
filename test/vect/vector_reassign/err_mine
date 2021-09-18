@@ -1,0 +1,16 @@
+LeakSanitizer:DEADLYSIGNAL
+==272249==ERROR: LeakSanitizer: SEGV on unknown address 0x605000010000 (pc 0x000000429f37 bp 0x7ffe08c96800 sp 0x7ffe08c967e0 T0)
+==272249==The signal is caused by a READ memory access.
+==272249==WARNING: invalid path to external symbolizer!
+==272249==WARNING: Failed to use and restart external symbolizer!
+    #0 0x429f37  (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x429f37)
+    #1 0x429eae  (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x429eae)
+    #2 0x4295af  (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x4295af)
+    #3 0x429081  (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x429081)
+    #4 0x42a203  (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x42a203)
+    #5 0x7f684aea90b2  (/lib/x86_64-linux-gnu/libc.so.6+0x270b2)
+    #6 0x4054bd  (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x4054bd)
+
+LeakSanitizer can not provide additional info.
+SUMMARY: LeakSanitizer: SEGV (/home/lzins/Documents/ft_containers/bin/vect/vector_reassign_mine+0x429f37) 
+==272249==ABORTING

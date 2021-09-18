@@ -94,15 +94,38 @@ template <typename Iter>
     Iter,
     typename enable_if<
         has_iterator_category<Iter>::value
-        && (   has_iterator_trait<Iter, std::input_iterator_tag>::value
-            || has_iterator_trait<Iter, std::output_iterator_tag>::value
-            || has_iterator_trait<Iter, std::forward_iterator_tag>::value
-            || has_iterator_trait<Iter, std::bidirectional_iterator_tag>::value
-            || has_iterator_trait<Iter, std::random_access_iterator_tag>::value
+        && ( has_iterator_trait<Iter, std::input_iterator_tag>::value ||
+             has_iterator_trait<Iter, std::output_iterator_tag>::value ||
+             has_iterator_trait<Iter, std::forward_iterator_tag>::value ||
+             has_iterator_trait<Iter, std::bidirectional_iterator_tag>::value ||
+             has_iterator_trait<Iter, std::random_access_iterator_tag>::value
         )
       >::type
-    >
+  >
   : true_type {};
+
+template <typename T, typename = void>
+  struct is_integral
+  : false_type {};
+template <typename T>
+  struct is_integral<
+    T,
+    typename enable_if<
+      is_same<T, bool>::value ||
+      is_same<T, char>::value ||
+      is_same<T, signed char>::value ||
+      is_same<T, unsigned char>::value ||
+      is_same<T, wchar_t>::value ||
+      is_same<T, short>::value ||
+      is_same<T, unsigned short>::value ||
+      is_same<T, int>::value ||
+      is_same<T, unsigned int>::value ||
+      is_same<T, long>::value ||
+      is_same<T, unsigned long>::value
+    >::type
+  >
+  : true_type {};
+
 
 template <typename T, typename Alloc = std::allocator<T> >
 class vector {
@@ -122,6 +145,16 @@ class vector {
   typedef typename std::reverse_iterator<iterator>       reverse_iterator;
   typedef typename std::reverse_iterator<const_iterator> const_reverse_iterator;
 
+ private:
+  struct _range {
+    size_type       start;
+    size_type       stop;
+    difference_type increment;
+
+    _range(size_type start, size_type stop, difference_type increment)
+      : start(start), stop(stop), increment(increment) {}
+  };
+
  public:
   // Constructors, Destructor, Assign operation
 
@@ -139,11 +172,12 @@ class vector {
 
   template <class InputIterator>
   vector(InputIterator first,
-         typename enable_if_t<is_iterator<InputIterator>::value, InputIterator>::type last,
+        //  typename enable_if_t<is_iterator<InputIterator>::value, InputIterator>::type last,
+         typename enable_if_t<!is_integral<InputIterator>::value, InputIterator>::type last,
          const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
     _allocate(MIN_CAPACITY);
-    _construct(first, last);
+    _push_back_range(first, last);
   }
 
   vector(const vector &x) : _array(NULL), _size(x._size), _capacity(x._capacity), _allocator(x._allocator) {
@@ -172,14 +206,12 @@ class vector {
 
   //Change size (public member function )
   void resize(size_type n, value_type val = value_type()) {
-    if (n < _size) {
-      for (size_type i = n; i < _size; ++i)
-        _allocator.destroy(_array + i);
-    } else if (n > _size) {
+    if (n < _size)
+      _destroy_from(n);
+    else if (n > _size) {
       if (n > _capacity)
         _enlarge(n + RESIZE_MARGIN);
-      for (size_type i = _size; i < n; ++i)
-        _allocator.construct(_array + i, val);
+      _construct(_size, n - _size, val);
     }
   }
 
@@ -245,10 +277,10 @@ class vector {
 
   //Add element at the end (public member function )
   void push_back(const value_type &val) {
-    // _enlarge_if_full();
-    if (_size == _capacity)
-      _enlarge(_capacity * 2);
-    _allocator.construct(_array + _size++, val);
+    _enlarge_if_full();
+    // if (_size == _capacity)
+    //   _enlarge(_capacity * 2);
+    _construct(_size, 1, val);
   }
 
   //Delete last element (public member function )
@@ -265,6 +297,7 @@ class vector {
 
   void insert(iterator position, size_type n, const value_type& val) {
     _enlarge_if_full(n);
+    // Moving (part 1)
     size_type start = static_cast<size_type>(position - begin());
     size_type i = _size - 1 + n;
     while (i >= _size || i >= start + n) {
@@ -368,7 +401,7 @@ class vector {
   }
 
   template <class InputIterator>
-      void _construct(InputIterator first, InputIterator last) {
+      void _push_back_range(InputIterator first, InputIterator last) {
     for (InputIterator it = first; it != last; ++it)
       push_back(*it);
   }
@@ -376,6 +409,30 @@ class vector {
   void _construct(size_type start, size_type n, const value_type& val) {
       for (size_type i = 0; i < n; i++)
         _allocator.construct(_array + start + i, val);
+  }
+
+  // void _construct_range(_range const & dst, _range const & src, size_type max) {
+  //   size_type cpt = 0;
+  //   size_type j = src.start;
+  //   for (size_type i = dst.start; i != dst.stop && cpt < max; i += dst.increment) {
+  //     _allocator.construct(_array + i, _array + j);
+  //     j += src.increment;
+  //     cpt++;
+  //   }
+  // }
+
+  // void _copy_range(_range const & dst, _range const & src) {
+  //   size_type j = src.start;
+  //   for (size_type i = dst.start; i != dst.stop ; i += dst.increment) {
+  //     *(_array + i) = *(_array + j);
+  //     j += src.increment;
+  //   }
+  // }
+
+  void _assign_range(_range const & dst, value_type const & val) {
+    for (size_type i = dst.start; i != dst.stop ; i += dst.increment) {
+      *(_array + i) = val;
+    }
   }
 
   void _destroy_at(size_type i) {
@@ -403,7 +460,7 @@ class vector {
     _destroy_from(0);
     _deallocate();
     _allocate(x._capacity);
-    _construct(x.begin(), x.end());
+    _push_back_range(x.begin(), x.end());
     _size = x._size;
   }
 
