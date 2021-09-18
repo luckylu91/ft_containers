@@ -41,8 +41,9 @@ template<class Vect> void print_vect(Vect const &vect) {
 
 void test()
 {
-  vector<A> vect;
+  vector<A> vect(5);
 
+  std::cout << "--- push_back x 4 ---" << std::endl;
   vect.push_back(A());
   vect.push_back(A());
   vect.push_back(A());
@@ -53,5 +54,5 @@ void test()
   vect.erase(vect.begin(), vect.begin() + 2);
   std::cout << "vect : " << std::endl;
   print_vect(vect);
-  std::cout << "end" << std::endl;
+  std::cout << "--- end of scope ---" << std::endl;
 }
