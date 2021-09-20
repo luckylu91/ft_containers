@@ -1,5 +1,5 @@
 size = 8
 capacity = 12
-vector::_M_range_check: __n (which is 10) >= this->size() (which is 8)
+vector
 1 1 2 1 1 1 0 1 
 1 1 2 1 1 1 0 

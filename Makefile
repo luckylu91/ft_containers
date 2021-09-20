@@ -5,7 +5,7 @@ cup="\\033[1A"
 erase="\\033[1A\\033[2K"
 
 CC =clang++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. -Iinclude -fsanitize=leak -g3
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. -Iinclude
 SHELL = /bin/bash
 # SUBDIRS = vect map
 SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)

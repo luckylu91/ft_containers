@@ -5,6 +5,8 @@
 #include <memory>
 #include <stdexcept>
 #include <algorithm>
+#include "equal.hpp"
+#include "lexicographical_compare.hpp"
 
 //
 #include <iostream>
@@ -363,12 +365,12 @@ class vector {
   // Non-member function overloads
 
   //Relational operators for vectors
-  // bool operator== (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-  // bool operator!= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-  // bool operator<  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-  // bool operator<= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-  // bool operator>  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-  // bool operator>= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+  friend bool operator== (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return equal(lhs.begin(), lhs.end(), rhs.begin()); }
+  friend bool operator!= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return !(lhs == rhs); }
+  friend bool operator<  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+  friend bool operator>  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
+  friend bool operator>= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return !(lhs < rhs); }
+  friend bool operator<= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return !(lhs > rhs); }
 
   // Iterators
 
@@ -407,8 +409,9 @@ class vector {
   }
 
   void _construct(size_type start, size_type n, const value_type& val) {
-      for (size_type i = 0; i < n; i++)
-        _allocator.construct(_array + start + i, val);
+    for (size_type i = 0; i < n; i++)
+      _allocator.construct(_array + start + i, val);
+    _size += n;
   }
 
   // void _construct_range(_range const & dst, _range const & src, size_type max) {
@@ -447,7 +450,6 @@ class vector {
   }
 
   // DOUBT
-  //
   void _deallocate() {
     if (_array != NULL)
       _allocator.deallocate(_array, _capacity);
@@ -557,66 +559,6 @@ class vector {
    private:
     pointer _ptr;
   };
-
-  // class const_iterator {
-  //  public:
-  //   typedef std::random_access_iterator_tag iterator_category;
-  //   typedef std::ptrdiff_t difference_type;
-  //   typedef T value_type;
-  //   typedef Alloc allocator_type;
-  //   typedef typename allocator_type::const_pointer pointer;
-  //   typedef typename allocator_type::const_reference reference;
-
-  //   const_iterator(pointer ptr = 0) : _ptr(ptr) {}
-  //   const_iterator &operator=(const_iterator &x) {
-  //     _ptr = x._ptr;
-  //     return *this;
-  //   }
-
-  //   reference operator*() const { return *_ptr; }
-  //   reference operator->() const { return _ptr; }
-  //   const_iterator &operator++() {
-  //     ++_ptr;
-  //     return *this;
-  //   }
-  //   const_iterator operator++(int) {
-  //     const_iterator old_value(*this);
-  //     ++_ptr;
-  //     return old_value;
-  //   }
-  //   const_iterator &operator--() {
-  //     --_ptr;
-  //     return *this;
-  //   }
-  //   const_iterator operator--(int) {
-  //     const_iterator old_value(*this);
-  //     --_ptr;
-  //     return old_value;
-  //   }
-  //   reference operator[](int i) { return *(_ptr + i); }
-  //   const_iterator &operator+=(difference_type delta) {
-  //     _ptr += delta;
-  //     return *this;
-  //   }
-  //   const_iterator &operator-=(difference_type delta) {
-  //     _ptr -= delta;
-  //     return *this;
-  //   }
-
-  //   friend difference_type operator-(const_iterator const &a, const_iterator const &b) { return a._ptr - b._ptr; };
-  //   friend const_iterator operator+(const_iterator const &a, difference_type delta) { return const_iterator(a._ptr + delta); };
-  //   friend const_iterator operator+(difference_type delta, const_iterator const &a) { return const_iterator(a._ptr + delta); };
-  //   friend const_iterator operator-(const_iterator const &a, difference_type delta) { return const_iterator(a._ptr - delta); };
-  //   friend bool operator==(const_iterator const &a, const_iterator const &b) { return a._ptr == b._ptr; };
-  //   friend bool operator!=(const_iterator const &a, const_iterator const &b) { return a._ptr != b._ptr; };
-  //   friend bool operator<(const_iterator const &a, const_iterator const &b) { return a._ptr < b._ptr; };
-  //   friend bool operator>(const_iterator const &a, const_iterator const &b) { return a._ptr > b._ptr; };
-  //   friend bool operator<=(const_iterator const &a, const_iterator const &b) { return a._ptr <= b._ptr; };
-  //   friend bool operator>=(const_iterator const &a, const_iterator const &b) { return a._ptr >= b._ptr; };
-
-  //  private:
-  //   pointer _ptr;
-  // };
 };
 
 }  // namespace ft

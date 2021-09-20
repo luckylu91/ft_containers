@@ -215,8 +215,6 @@ class map {
     typedef Alloc allocator_type;
     typedef IteratorType* pointer;
     typedef IteratorType& reference;
-    // typedef BST<key_type, mapped_type, key_compare, value_compare, allocator_type>                bst_type;
-    // typedef typename BST<key_type, mapped_type, key_compare, value_compare, allocator_type>::Node bst_node_type;
 
     Iterator(map const & map, bool isEnd) : bst(map._tree), isEnd(isEnd) {
       if (this->bst.root == NULL || isEnd)
@@ -511,20 +509,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       return (1 + Node::get_size(p->left) + Node::get_size(p->right));
     }
 
-    // Node *getIndex(int idx) {
-    //   int lSize = static_cast<int>(this->left->getSize());
-    //   if (idx == lSize)
-    //     return (this);
-    //   else if (idx < lSize)
-    //     return this->left->median(idx);
-    //   else
-    //     return this->right->median(idx - lSize);
-    // }
-
-    // Node *median() {
-    //   return this->getIndex(this->getSize() / 2);
-    // }
-
     Node const *leftmost_child() const {
       if (this->left == NULL)
         return this;
@@ -764,7 +748,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
   allocator_type alloc;
   bool oneWasRemoved;
 };
-
 
 }  // namespace ft
 

@@ -20,7 +20,7 @@ class A {
     std::cout << "Destructor (" << _cpt << ")" << std::endl;
   }
   A & operator=(A const & other) {
-    std::cout << "Assign Operator (" << _cpt << "->" << other._cpt << ")" << std::endl;
+    std::cout << "Assign Operator (" << _cpt << " becomes " << other._cpt << ")" << std::endl;
     _cpt = other._cpt;
     delete m;
     m = new int(*(other.m));
