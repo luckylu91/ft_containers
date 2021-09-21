@@ -5,30 +5,28 @@ cup="\\033[1A"
 erase="\\033[1A\\033[2K"
 
 CC =clang++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -I. -Iinclude
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -Iinclude
 SHELL = /bin/bash
-# SUBDIRS = vect map
+
 SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
 TEST_SRCS = $(shell find src -mindepth 2 -type f | grep -v ".dSYM")
+
 SUBDIRS_OBJ = $(addprefix obj/, $(SUBDIRS))
 SUBDIRS_BIN = $(addprefix bin/, $(SUBDIRS))
 SUBDIRS_TEST = $(addprefix test/, $(SUBDIRS))
-# VECT_SRCS =	$(addprefix src/vect/,\
-# 	vector_iterator.cpp \
-# 	vector_reassign.cpp \
-# )
-# SRCS = $(VECT_SRCS)
+
 OBJS =	$(TEST_SRCS:src/%.cpp=obj/%_mine.o) \
 				$(TEST_SRCS:src/%.cpp=obj/%_std.o) \
 				obj/main.o
-TESTS =	$(TEST_SRCS:src/%.cpp=test/%)
-INC =	pair.hpp \
-			vector.hpp \
-			map.hpp
+TESTS =				$(TEST_SRCS:src/%.cpp=test/%)
+TESTS_RULES =	$(TEST_SRCS:src/%.cpp=test_rule/%)
+INC =		$(wildcard include/*)
 
-all:	fclean $(TESTS)
-map:	fclean $(filter test/map/%, $(TESTS))
-vect:	fclean $(filter test/vect/%, $(TESTS))
+.PRECIOUS: bin/%
+
+all:	$(TESTS_RULES)
+map:	$(filter test/map/%, $(TESTS))
+vect:	$(filter test/vect/%, $(TESTS))
 
 echo:
 	@echo $(TESTS)
@@ -64,8 +62,11 @@ bin/%:	obj/%.o obj/main.o | $(SUBDIRS_BIN)
 test/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
 	@bash test.sh $@ $^
 
-# clean:
-# 	rm -rf bin/
+test_rule/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
+	@WILD=`echo $@ | cut -d/ -f2-` ; bash test.sh test/"$$WILD" bin/"$$WILD"_mine bin/"$$WILD"_std
+
+clean:
+	rm -rf obj/
 
 fclean:
 	rm -rf bin/
@@ -74,4 +75,4 @@ fclean:
 
 re: fclean all
 
-.PHONY: all fclean re
+.PHONY: all fclean re test_rule

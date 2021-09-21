@@ -13,6 +13,12 @@ void insert(map<int, int> & container, int k, int v) {
   std::cout << "Iterator points to " << *ret.first << std::endl;
 }
 
+void insert_many(map<int, int> & container, int n) {
+  for (int i = 0; i < n; ++i) {
+    container.insert(make_pair(i, i));
+  }
+}
+
 void test()
 {
   map<int, int> m0;
@@ -24,4 +30,6 @@ void test()
   for (int i = 0; i < 5; ++i) {
     insert(m0, i, 2 * i);
   }
+
+  insert_many(m0, 10000);
 }
