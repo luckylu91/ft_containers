@@ -77,6 +77,11 @@ void test_iterator_methods(InputIterator it) {
   std::noboolalpha(std::cout);
 }
 
+template <class InputIterator>
+void test_compl_iterator(InputIterator it) {
+  std::cout << "(it + 3) - it = " << (it + 3) - it << std::endl;
+}
+
 void test() {
   vector<int> intVect;
   for (int i = 0; i < 10; i++)
@@ -89,4 +94,7 @@ void test() {
   test_iterator_methods(cIntVect.begin());
 
   test_iterator_types();
+
+  std::cout << std::endl;
+  test_compl_iterator(intVect.begin());
 }

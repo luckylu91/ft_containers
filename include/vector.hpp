@@ -259,33 +259,22 @@ class vector {
 
   //Insert elements (public member function )
   iterator insert(iterator position, const value_type& val) {
-    if (position >= begin() && position < end())
-      insert(position, 1, val);
+    return _insert_range(position, 1, val);
   }
 
   void insert(iterator position, size_type n, const value_type& val) {
-    _enlarge_if_full(n);
-    // Moving (part 1)
-    size_type start = static_cast<size_type>(position - begin());
-    size_type i = _size - 1 + n;
-    while (i >= _size || i >= start + n) {
-      _allocator.construct(_array + i, _array + i - n);
-      i--;
-    }
-    while (i >= start + n) {
-      *(_array + i) = *(_array + i - n);
-      i--;
-    }
-    while (i >= start) {
-      *(_array + i) = val;
-      i--;
-    }
+    _insert_range(position, n, val);
   }
 
   template <class InputIterator>
-    void insert (iterator position, InputIterator first, InputIterator last) {
-      for (InputIterator it = first; it != last; ++it)
-        insert(position++, *it);
+    void insert (iterator position,
+                 InputIterator first,
+                 typename enable_if_t<!is_integral<InputIterator>::value, InputIterator>::type last) {
+    while (first != last) {
+      position = _insert_range(position, 1, *first);
+      first++;
+      position++;
+    }
   }
 
   //Erase elements (public member function )
@@ -455,6 +444,28 @@ class vector {
         _enlarge(new_capacity);
   }
 
+  iterator _insert_range(iterator position, size_type n, value_type const & val) {
+     size_type start = static_cast<size_type>(position - this->begin());
+    _enlarge_if_full(n);
+    // Move (part 1)
+    size_type i = _size - 1 + n;
+    while (i != _size - 1 && i != start + n - 1) {
+      _allocator.construct(_array + i, _array[i - n]);
+      i--;
+    }
+    // Move (part 2)
+    while (i != start + n - 1) {
+      _array[i] = _array[i - n];
+      i--;
+    }
+    // Assign
+    while (i != start - 1) {
+      _array[i] = val;
+      i--;
+    }
+    return begin() + start;
+  }
+
   void swap(vector &x, vector &y) {
     std::swap(x._array, y._array);
     std::swap(x._size, y._size);
@@ -475,10 +486,12 @@ class vector {
     typedef IteratorType&                   reference;
 
     Iterator(pointer ptr = 0) : _ptr(ptr) {}
-    Iterator &operator=(Iterator &x) {
+    Iterator(Iterator const &x) : _ptr(x._ptr) {}
+    Iterator &operator=(Iterator const &x) {
       _ptr = x._ptr;
       return *this;
     }
+    ~Iterator() {}
 
     reference operator*() const { return *_ptr; }
     reference operator->() const { return _ptr; }

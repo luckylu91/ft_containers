@@ -10,6 +10,8 @@ TEST_STDOUT_MINE="$1/out_mine"
 TEST_STDERR_MINE="$1/err_mine"
 TEST_STDOUT_STD="$1/out_std"
 TEST_STDERR_STD="$1/err_std"
+TEST_LEAKS_MINE="$1/leaks_mine"
+TEST_LEAKS_STD="$1/leaks_std"
 
 mkdir -p $1
 echo -n "Test $TEST_NAME..."
@@ -23,3 +25,13 @@ if [ -z "$DIFF" ]; then
 else
   echo -e "[$RED""KO""$NC""]"
 fi
+
+# leaks -atExit -- $2 > $TEST_LEAKS_MINE
+# if [[ $? -ne 0 ]]; then
+#   echo -e "    -> ""$RED""LEAKS""$NC"
+# fi
+
+# leaks -atExit -- $3 > $TEST_LEAKS_STD
+# if [[ $? -ne 0 ]]; then
+#   echo -e "    -> ""$RED""LEAKS_STD""$NC"
+# fi

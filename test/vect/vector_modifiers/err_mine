@@ -1,0 +1,21 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==19240==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x00010b6d0939 bp 0x7ffee453ac70 sp 0x7ffee453ac30 T0)
+==19240==The signal is caused by a READ memory access.
+==19240==Hint: address points to the zero page.
+    #0 0x10b6d0938 in A::operator=(A const&) vector_modifiers.cpp:12
+    #1 0x10b6d04e7 in ft::vector<A, std::__1::allocator<A> >::_insert_range(ft::vector<A, std::__1::allocator<A> >::Iterator<A>, unsigned long, A const&) vector.hpp:463
+    #2 0x10b6ce84d in ft::vector<A, std::__1::allocator<A> >::insert(ft::vector<A, std::__1::allocator<A> >::Iterator<A>, unsigned long, A const&) vector.hpp:266
+    #3 0x10b6c758b in void test_with<A>(A (&) [10], A (&) [7]) vector_modifiers.cpp:52
+    #4 0x10b6c5e96 in test() vector_modifiers.cpp:80
+    #5 0x10b6d1783 in main main.cpp:9
+    #6 0x7fff5dc0d3d4 in start (libdyld.dylib:x86_64+0x163d4)
+
+==19240==Register values:
+rax = 0x000060e0000000a8  rbx = 0x00007ffee453ace0  rcx = 0xbebebebebebebebe  rdx = 0x17d7d7d7d7d7d7d7  
+rdi = 0x00007ffee453b404  rsi = 0x0000100000000000  rbp = 0x00007ffee453ac70  rsp = 0x00007ffee453ac30  
+ r8 = 0x000000010ba89d10   r9 = 0x000000000438a226  r10 = 0x00007ffee453a3c8  r11 = 0x0000000000000000  
+r12 = 0x00007ffee453b0f0  r13 = 0x00007ffee453b110  r14 = 0xed5e9a41e12c0051  r15 = 0x00007ffee453b0d0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV vector_modifiers.cpp:12 in A::operator=(A const&)
+==19240==ABORTING

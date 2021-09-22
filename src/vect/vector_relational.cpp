@@ -1,15 +1,5 @@
 #include "test_vector.h"
 
-template<typename T, size_t n>
-size_t length(T (*)[n]) {
-  return n;
-}
-
-template<typename T, size_t n>
-int *end(T (*array)[n]) {
-  return *array + n;
-}
-
 void all_comparisons(vector<int> const & a, vector<int> const & b) {
   std::boolalpha(std::cout);
   std::cout << "a = ";

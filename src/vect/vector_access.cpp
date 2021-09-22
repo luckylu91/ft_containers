@@ -24,9 +24,16 @@ void test() {
   }
   std::cout << std::endl;
 
-  std::cout <<  << std::endl;
   std::cout << vect.size() << std::endl;
 
   try_at(vect, 5);
   try_at(vect, 105);
+
+  vect.front() = 1111111;
+  vect.back() = 9999999;
+  print_vect(vect);
+
+  vector<int> const vect2(vect);
+  std::cout << vect2.back() << std::endl;
+  std::cout << vect2.front() << std::endl;
 }

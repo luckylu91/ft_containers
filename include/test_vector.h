@@ -20,6 +20,20 @@ template<class Vect> void print_vect(Vect const &vect) {
     print_and_sep(*it);
   std::cout << *(vect.end() - 1) << ")";
 }
+template<class Vect> void print_vect_nl(Vect const &vect) {
+  print_vect(vect);
+  std::cout << std::endl;
+}
+
+template<typename T, size_t n>
+size_t length(T (*)[n]) {
+  return n;
+}
+
+template<typename T, size_t n>
+int *end(T (*array)[n]) {
+  return *array + n;
+}
 
 // template <class C1, class C2>
 // std::ostream & operator<<(std::ostream & os, pair<C1, C2> const & p) {
