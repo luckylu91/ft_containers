@@ -26,7 +26,7 @@ INC =		$(wildcard include/*)
 
 all:	$(TESTS_RULES)
 map:	$(filter test/map/%, $(TESTS))
-vect:	$(filter test/vect/%, $(TESTS))
+vect: $(filter test/vect/%, $(TESTS))
 
 echo:
 	@echo $(TESTS)
@@ -63,7 +63,7 @@ test/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
 	@bash test.sh $@ $^
 
 test_rule/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
-	@WILD=`echo $@ | cut -d/ -f2-` ; bash test.sh test/"$$WILD" bin/"$$WILD"_mine bin/"$$WILD"_std
+	@bash test.sh $@ $^
 
 clean:
 	rm -rf obj/

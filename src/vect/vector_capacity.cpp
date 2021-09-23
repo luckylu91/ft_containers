@@ -21,12 +21,12 @@ void test() {
   vect.resize(5, 0);
   print_vect(vect);
 
-  size_t vect_size = vect.size();
-  size_t vect_capacity = vect.capacity();
-  for (size_t i = 0; i < vect_capacity - vect_size; ++i) {
-    vect[vect_size++] = 999;
-  }
-  std::cout << (vect.capacity() == vect_capacity) << std::endl;
+  // size_t vect_size = vect.size();
+  // size_t vect_capacity = vect.capacity();
+  // for (size_t i = vect_size - 1; i < vect_capacity; ++i) {
+  //   vect[i] = 999;
+  // }
+  // std::cout << (vect.capacity() == vect_capacity) << std::endl;
 
 
   std::cout << vect.max_size() << std::endl;

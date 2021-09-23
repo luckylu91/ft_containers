@@ -31,7 +31,7 @@ size_t length(T (*)[n]) {
 }
 
 template<typename T, size_t n>
-int *end(T (*array)[n]) {
+T *end(T (*array)[n]) {
   return *array + n;
 }
 

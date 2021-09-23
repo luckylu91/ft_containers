@@ -94,7 +94,6 @@ template <typename T>
   >
   : true_type {};
 
-
 template <typename T, typename Alloc = std::allocator<T> >
 class vector {
  public:
@@ -225,36 +224,33 @@ class vector {
 
   //Assign vector content (public member function )
   template <class InputIterator>
-      void assign (InputIterator first, InputIterator last) {
+      void assign(InputIterator first,
+                  typename enable_if_t< !is_integral<InputIterator>::value, InputIterator >::type last) {
     _destroy_from(0);
     for (InputIterator it = first; it != last; ++it)
       push_back(*it);
   }
 
-  void assign (size_type n, const value_type& val) {
+  void assign(size_type n, const value_type& val) {
     _destroy_from(0);
     if (n > _capacity)
     {
       _deallocate();
       _allocate(n + ASSIGN_MARGIN);
     }
-    else if (n < _capacity)
-      _destroy_from(n);
     _construct(0, n, val);
   }
 
   //Add element at the end (public member function )
   void push_back(const value_type &val) {
     _enlarge_if_full();
-    // if (_size == _capacity)
-    //   _enlarge(_capacity * 2);
     _construct(_size, 1, val);
   }
 
   //Delete last element (public member function )
   void pop_back() {
     if (_size > 0)
-      _destroy_at(_size);
+      _destroy_at(_size - 1);
   }
 
   //Insert elements (public member function )
@@ -301,7 +297,10 @@ class vector {
 
   //Swap content (public member function )
   void swap(vector &x) {
-    std::swap(*this, x);
+    std::swap(_array, x._array);
+    std::swap(_size, x._size);
+    std::swap(_capacity, x._capacity);
+    std::swap(_allocator, x._allocator);
   }
 
   //Clear content (public member function )
@@ -342,7 +341,10 @@ class vector {
   const_reverse_iterator rend() const { return const_reverse_iterator(_array); }
 
   //Exchange contents of vectors
-  friend void swap(vector<T, Alloc> &x, vector<T, Alloc> &y);
+  friend void swap(vector &x, vector &y) {
+    x.swap(y);
+  }
+
 
  private:
   pointer _array;
@@ -424,11 +426,11 @@ class vector {
     pointer new_area = _allocator.allocate(new_capacity);
     pointer old_area = _array;
     if (_size > 0) {
-      for (size_type i = 0; i < _size; i++)
-        _allocator.construct(new_area + i, old_area[i]);
+      for (size_type i = _size; i > 0; i--)
+        _allocator.construct(new_area + i - 1, old_area[i - 1]);
       if (old_area != NULL) {
-        for (size_type i = 0; i < _size; i++)
-          _allocator.destroy(old_area + i);
+        for (size_type i = _size; i > 0; i--)
+          _allocator.destroy(old_area + i - 1);
         _allocator.deallocate(old_area, _capacity);
       }
     }
@@ -463,15 +465,8 @@ class vector {
       _array[i] = val;
       i--;
     }
+    _size += n;
     return begin() + start;
-  }
-
-  void swap(vector &x, vector &y) {
-    std::swap(x._array, y._array);
-    std::swap(x._size, y._size);
-    std::swap(x._capacity, y._capacity);
-    std::swap(x._shrink_threshold, y._shrink_threshold);
-    std::swap(x._allocator, y._allocator);
   }
 
  public:
