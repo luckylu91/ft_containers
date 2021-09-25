@@ -16,10 +16,10 @@ void test() {
   std::cout << vect.size() << std::endl;
 
   vect.resize(15, 666);
-  print_vect(vect);
+  print_container(vect);
 
   vect.resize(5, 0);
-  print_vect(vect);
+  print_container(vect);
 
   // size_t vect_size = vect.size();
   // size_t vect_capacity = vect.capacity();

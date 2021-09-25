@@ -1,11 +1,13 @@
 #pragma once
 #include <memory>
 #include <functional>
-#include <cmath>
+// #include <cmath>
+#include <algorithm> // max
 #include "pair.hpp"
-//
-#include <iostream>
-#include <iomanip>
+// //
+// #include <iostream>
+// #include <iomanip>
+
 
 namespace ft {
 
@@ -63,6 +65,7 @@ class map {
 // Copy container content (public member function )
   map& operator= (const map& x) {
     this->_tree = x._tree;
+    return *this;
   }
 
 // Iterators
@@ -202,8 +205,10 @@ class map {
     typedef IteratorType& reference;
 
     Iterator(map const & map, bool isEnd) : bst(map._tree), isEnd(isEnd) {
-      if (this->bst.root == NULL || isEnd)
+      if (this->bst.root == NULL || isEnd) {
+        this->isEnd = true;
         this->current = NULL;
+      }
       else
         this->current = this->bst.root->leftmost_child();
     }
@@ -275,8 +280,8 @@ public:
   KeyCompare kComp;
   value_compare (KeyCompare c) : kComp(c) {}
   typedef bool result_type;
-  typedef value_type first_argument_type;
-  typedef value_type second_argument_type;
+  typedef key_type first_argument_type;
+  typedef mapped_type second_argument_type;
   bool operator() (const value_type& x, const value_type& y) const {
     return kComp(x.first, y.first);
   }
@@ -319,11 +324,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     }
 
     static Node *rotate_left(Node *x) {
-      if (x == NULL)
-        std::cout << "X IS NULL" << std::endl;
-      if (x->right == NULL)
-        std::cout << "y IS NULL" << std::endl;
-
       Node *xOldParent = x->parent;
       Node *y = x->right;
       Node *yL = y->left;
@@ -614,14 +614,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     value_compare get_value_comparator() const { return this->comp; };
     value_type *get_value() const { return this->value; }
 
-    void _print() {
-      if (this->left != NULL)
-        this->left->_print();
-      std::cout << *value << " (" << this->height << "), ";
-      if (this->right != NULL)
-        this->right->_print();
-    }
-
     friend bool operator<(Node const & a, value_type const & b) { return a.comp(*a.value, b); }
     friend bool operator<(Node const & a, key_type const & b) { return a.kComp(a.value->first, b); }
 
@@ -727,6 +719,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
   BST &operator=(BST const &x) {
     this->clear();
     this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
+    return *this;
   }
 
   friend bool operator==(BST const & a, BST const & b) { return a.root == b.root; }
@@ -735,12 +728,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
   allocator_type get_allocator() const { return this->alloc; };
   value_compare get_key_comparator() const { return this->kComp; };
   value_compare get_value_comparator() const { return this->comp; };
-
-  void _print() {
-    if (root != NULL)
-      root->_print();
-    std::cout << "END" << std::endl;
-  }
 
  private:
 

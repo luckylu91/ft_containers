@@ -1,0 +1,22 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==18248==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0001054acb70 bp 0x7ffeea7592f0 sp 0x7ffeea7592e0 T0)
+==18248==The signal is caused by a READ memory access.
+==18248==Hint: address points to the zero page.
+    #0 0x1054acb6f in ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::get_value() const map.hpp
+    #1 0x1054afa37 in ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > >::Iterator<ft::pair<int const, int> const>::operator*() const map.hpp:224
+    #2 0x1054af664 in void print_container<ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > > >(ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > > const&) test_utils.h:10
+    #3 0x1054a8544 in void print_container_nl<ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > > >(ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > > const&) test_utils.h:15
+    #4 0x1054a82d9 in test_clear() map_modifiers.cpp:34
+    #5 0x1054a9297 in test() map_modifiers.cpp:72
+    #6 0x1054b0d63 in main main.cpp:9
+    #7 0x7fff5f8703d4 in start (libdyld.dylib:x86_64+0x163d4)
+
+==18248==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ffeea759400  rcx = 0x0000100000000000  rdx = 0x00007ffeea759300  
+rdi = 0x0000000000000000  rsi = 0x00001fffdd4eb264  rbp = 0x00007ffeea7592f0  rsp = 0x00007ffeea7592e0  
+ r8 = 0x0000100000000000   r9 = 0x0000100000000000  r10 = 0x0000000000000000  r11 = 0xffffffffffffffff  
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000004  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV map.hpp in ft::map<int, int, std::__1::less<int>, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::get_value() const
+==18248==ABORTING

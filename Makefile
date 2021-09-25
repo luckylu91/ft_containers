@@ -27,6 +27,7 @@ INC =		$(wildcard include/*)
 all:	$(TESTS_RULES)
 map:	$(filter test/map/%, $(TESTS))
 vect: $(filter test/vect/%, $(TESTS))
+reverse: $(filter test/reverse_iterator/%, $(TESTS))
 
 echo:
 	@echo $(TESTS)

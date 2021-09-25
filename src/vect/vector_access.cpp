@@ -17,7 +17,7 @@ void test() {
   for (int i = 0; i < 100; i++) {
     vect[i] = i;
   }
-  print_vect(vect);
+  print_container(vect);
   std::cout << std::endl;
   for (int i = 0; i < 100; i++) {
     std::cout << vect[i] << " ";
@@ -31,7 +31,7 @@ void test() {
 
   vect.front() = 1111111;
   vect.back() = 9999999;
-  print_vect(vect);
+  print_container(vect);
 
   vector<int> const vect2(vect);
   std::cout << vect2.back() << std::endl;

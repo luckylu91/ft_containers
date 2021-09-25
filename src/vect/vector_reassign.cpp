@@ -48,10 +48,10 @@ void test()
   vect.push_back(A());
   vect.push_back(A());
   vect.push_back(A());
-  print_vect_nl(vect);
+  print_container_nl(vect);
   std::cout << "--- erasing the 2 first elements ---" << std::endl;
   vect.erase(vect.begin(), vect.begin() + 2);
-  print_vect_nl(vect);
+  print_container_nl(vect);
   std::cout << "--- reserving 25 ---" << std::endl;
   vect.reserve(25);
   std::cout << "--- push_back x 20 ---" << std::endl;

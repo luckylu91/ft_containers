@@ -37,7 +37,7 @@ void test_with(T (&array10)[10], T (&array7)[7]) {
     std::cout << vect.size() << std::endl;
     std::cout << vect.back() << std::endl;
   }
-  print_vect_nl(vect);
+  print_container_nl(vect);
 
   //insert iterator
   vect.insert(vect.begin() + 5, array7, array7 + 3);
@@ -52,7 +52,7 @@ void test_with(T (&array10)[10], T (&array7)[7]) {
   vect.insert(vect.end() - 1, array7[5]);
   vect.insert(vect.begin() + 8, 6, array7[5]);
 
-  print_vect_nl(vect);
+  print_container_nl(vect);
 
   // pop_back
   for (int i = 0; i < 5; i++) {
@@ -60,7 +60,7 @@ void test_with(T (&array10)[10], T (&array7)[7]) {
     std::cout << "vect.back() = " << vect.back() << std::endl;
     std::cout << "vect.size() = " << vect.size() << std::endl;
   }
-  print_vect_nl(vect);
+  print_container_nl(vect);
 
   // erase, clear
   vect.erase(vect.begin() + 2);
@@ -73,19 +73,19 @@ void test_assign(T (&array10)[10]) {
 
   vect.assign(array10, array10 + 10);
   std::cout << "vect.size() = " << vect.size() << std::endl;
-  print_vect_nl(vect);
+  print_container_nl(vect);
 
   vect.assign(array10, array10 + 5);
   std::cout << "vect.size() = " << vect.size() << std::endl;
-  print_vect_nl(vect);
+  print_container_nl(vect);
 
   vect.assign(100, array10[0]);
   std::cout << "vect.size() = " << vect.size() << std::endl;
-  print_vect_nl(vect);
+  print_container_nl(vect);
 
   vect.assign(5, array10[1]);
   std::cout << "vect.size() = " << vect.size() << std::endl;
-  print_vect_nl(vect);
+  print_container_nl(vect);
 }
 
 template <typename T>
@@ -95,12 +95,12 @@ void test_swap(T (&array10)[10], T (&array7)[7]) {
 
   vect10.assign(array10, array10 + 10);
   vect7.assign(array7, array7 + 7);
-  print_vect_nl(vect10);
-  print_vect_nl(vect7);
+  print_container_nl(vect10);
+  print_container_nl(vect7);
   std::cout << "Swapping" << std::endl;
   vect10.swap(vect7);
-  print_vect_nl(vect10);
-  print_vect_nl(vect7);
+  print_container_nl(vect10);
+  print_container_nl(vect7);
 }
 
 
