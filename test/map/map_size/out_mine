@@ -18,14 +18,23 @@ Map size = 9
 Actual size = 9
 Map size = 10
 Actual size = 10
+Deleting 0
 Map size = 9
 Actual size = 9
+Deleting 1
+Moving child up (2)
+Balancing
 Map size = 8
 Actual size = 8
+Deleting 2
+Balancing
 Map size = 7
 Actual size = 7
+Deleting 3
+Moving child up (4)
 Map size = 6
 Actual size = 6
+Deleting 4
 Map size = 5
 Actual size = 5
 Map size = 0

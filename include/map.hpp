@@ -124,7 +124,7 @@ class map {
 
   // Erase elements (public member function )
   void erase (iterator position) {
-    key_type &k = position->first;
+    key_type const &k = position->first;
     this->_tree.remove(k);
   }
 
@@ -133,8 +133,11 @@ class map {
   }
 
   void erase (iterator first, iterator last) {
-    for (iterator it = first; it != last; ++it) {
-      this->erase(it);
+    iterator current;
+    while (first != last) {
+      iterator current = first++;
+      // std::cout << "Current : " << current->first << std::endl;
+      this->erase(current);
     }
   }
 
@@ -204,33 +207,37 @@ class map {
     typedef IteratorType* pointer;
     typedef IteratorType& reference;
 
-    Iterator(map const & map, bool isEnd) : bst(map._tree), isEnd(isEnd) {
-      if (this->bst.root == NULL || isEnd) {
+    Iterator() : bst(NULL), current(NULL), isEnd(true) {}
+
+    Iterator(map const & map, bool isEnd) : bst(&map._tree), isEnd(isEnd) {
+      if (this->bst->root == NULL || isEnd) {
         this->isEnd = true;
         this->current = NULL;
       }
       else
-        this->current = this->bst.root->leftmost_child();
+        this->current = this->bst->root->leftmost_child();
     }
 
-    Iterator(map const & map, bst_node_type *node) : bst(map._tree), isEnd(node != NULL) {
-      this->current = node;
-    }
+    Iterator(map const & map, bst_node_type *node) : bst(&map._tree), current(node), isEnd(node != NULL) {}
 
     Iterator &operator=(Iterator &x) {
+      this->bst = x.bst;
       this->current = x.current;
       this->isEnd = isEnd;
       return *this;
     }
 
     reference operator*() const { return *current->get_value(); }
-    reference operator->() const { return current->get_value(); }
+    pointer operator->() const { return current->get_value(); }
     Iterator &operator++() {
+      // std::cout << "current : " << current->get_value()->first << std::endl;
       bst_node_type *n = this->current->next();
       if (n != NULL)
         this->current = n;
-      else
+      else {
         this->isEnd = true;
+        this->current = NULL;
+      }
       return *this;
     }
     Iterator operator++(int) {
@@ -241,8 +248,7 @@ class map {
     Iterator &operator--() {
       if (this->isEnd) {
         this->isEnd = false;
-        if (this->current == NULL)
-          this->current = this->bst.root->rightmost_child();
+        this->current = this->bst->root->rightmost_child();
       }
       else
         this->current = this->current->previous();
@@ -254,15 +260,23 @@ class map {
       return old_value;
     }
     friend bool operator==(Iterator const &a, Iterator const &b) {
-      return a.bst == b.bst && a.isEnd == b.isEnd && (a.isEnd || (!a.isEnd && a.current == b.current));
+      if ((a.bst == NULL && b.isEnd) || (a.isEnd && b.bst == NULL))
+        return true;
+      if (a.isEnd && b.isEnd)
+        return true;
+      if (a.isEnd != b.isEnd)
+        return false;
+      return a.current == b.current;
+      // return a.bst == b.bst && a.isEnd == b.isEnd && (!a.isEnd && a.current == b.current);
     }
     friend bool operator!=(Iterator const &a, Iterator const &b) {
-      return a.bst != b.bst || a.isEnd != b.isEnd || (!a.isEnd && a.current != b.current);
+      return !(a == b);
+      // return a.bst != b.bst || a.isEnd != b.isEnd || (!a.isEnd && a.current != b.current);
     }
 
    private:
+    bst_type const * bst;
     bst_node_type *current;
-    bst_type const & bst;
     bool isEnd;
   };
 
@@ -308,6 +322,16 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
         lastAdded = this;
     }
 
+    Node & operator=(Node const & x) {
+      this->value = x.value;
+      this->left = x.left;
+      this->right = x.right;
+      this->parent = x.parent;
+      this->height = x.height;
+      this->oneWasAdded = x.oneWasAdded;
+      return *this;
+    }
+
     ~Node() {
       alloc.destroy(this->value);
       alloc.deallocate(this->value, 1);
@@ -318,10 +342,10 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
         n->parent = p;
     }
 
-    static void permute(Node *a, Node *b) {
-      std::swap(*a, *b);
-      std::swap(a->value, b->value);
-    }
+    // static void permute(Node *a, Node *b) {
+    //   std::swap(*a, *b);
+    //   std::swap(a->value, b->value);
+    // }
 
     static Node *rotate_left(Node *x) {
       Node *xOldParent = x->parent;
@@ -408,16 +432,77 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       return Node::do_rebalance_cases(p, balance > 1, new_val < *child);
     }
 
-    static Node *move_only_child_up(Node *p) {
-      Node *temp = p->left != NULL ? p->left : p->right;
-      temp->parent = p->parent;
-      p->left = NULL;
-      p->right = NULL;
-      delete p;
-      return temp;
+    static void change_node_parents_child(Node *n1, Node *n2) {
+      if (n1->parent != NULL && n1->parent != n2) {
+        if (n1->is_left_child())
+          n1->parent->left = n2;
+        else
+          n1->parent->right = n2;
+      }
+    }
+    static void change_left_childs_parent(Node *n1, Node *n2) {
+      if (n1->left != NULL && n1->left != n2)
+        n1->left->parent = n2;
+    }
+    static void change_right_childs_parent(Node *n1, Node *n2) {
+      if (n1->right != NULL && n1->right != n2)
+        n1->right->parent = n2;
+    }
+    static void swap_nodes(Node *n1, Node *n2) {
+      Node::change_node_parents_child(n1, n2);
+      Node::change_node_parents_child(n2, n1);
+      Node::change_left_childs_parent(n1, n2);
+      Node::change_left_childs_parent(n2, n1);
+      Node::change_right_childs_parent(n1, n2);
+      Node::change_right_childs_parent(n2, n1);
+      std::swap(n1->parent, n2->parent);
+      std::swap(n1->left, n2->left);
+      std::swap(n1->right, n2->right);
+      std::swap(n1->height, n2->height);
+      std::swap(n1->oneWasAdded, n2->oneWasAdded);
     }
 
-    // TODO balance
+    // static void swap_nodes(Node *n1, Node *n2) {
+    //   std::swap(*n1, *n2);
+    //   std::swap(n1->value, n2->value);
+    // }
+
+    static Node *move_only_child_up(Node *p) {
+      Node *child = (p->left != NULL) ? p->left : p->right;
+      child->parent = p->parent;
+      // change_node_parents_child (p, child);
+      if (child->parent != NULL)
+        child->parent->update_height();
+      // p->left = NULL;
+      // p->right = NULL;
+      //
+      std::cout << "Deleting " << p->value->first << std::endl;
+      std::cout << "Moving child up (" << child->value->first << ")" << std::endl;
+      //
+      delete p;
+      return child;
+    }
+
+    static void _print_from_rec(Node *n) {
+      if (n == NULL)
+        return ;
+      std::cout << n->value->first;
+      Node *next = n->next();
+      if (next == NULL)
+        std::cout << "->END";
+      else if (next == n->right)
+        std::cout << "_";
+      else if (next == n->parent)
+        std::cout << "^";
+      else
+        std::cout << "|";
+      _print_from_rec(next);
+    }
+    static void _print_from(Node *n) {
+      _print_from_rec(n);
+      std::cout << std::endl;
+    }
+
     static Node *remove(Node *p, key_type const &kVal, BST &bst) {
       if (p == NULL) {
         bst.oneWasRemoved = false;
@@ -431,6 +516,9 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       }
       else {
         if (p->left == NULL && p->right == NULL) {
+          //
+          std::cout << "Deleting " << p->value->first << std::endl;
+          //
           delete p;
           bst.oneWasRemoved = true;
           return NULL;
@@ -441,7 +529,29 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
         }
         else {
           Node *k = p->next();
-          std::swap(p->value, k->value);
+          // std::swap(p->value, k->value);
+          // if (p->parent == NULL) {
+          //   std::cout << "Root p = " << p->value->first << std::endl;
+          //   std::cout << "next k = " << k->value->first << std::endl;
+          //   Node::swap_nodes(p, k);
+          //   std::cout << "Now p = " << p->value->first << std::endl;
+          //   std::cout << "Now k = " << k->value->first << std::endl;
+          //   std::cout << "p->left = " << p->left << std::endl;
+          //   std::cout << "p->right = " << p->right << std::endl;
+          // }
+          // else
+          std::cout << "From p : ";
+          Node::_print_from(p);
+          std::cout << "From k : ";
+          Node::_print_from(k);
+          std::cout << "Swapping" << std::endl;
+          Node::swap_nodes(p, k);
+          std::cout << "From p : ";
+          Node::_print_from(p);
+          std::cout << "From k : ";
+          Node::_print_from(k);
+
+          std::swap(p, k);
           p->right = Node::remove(p->right, kVal, bst);
         }
       }
@@ -450,6 +560,9 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       balance[0] = p->get_balance();
       if (balance[0] >= -1 && balance[0] <= 1)
         return p;
+      //
+      std::cout << "Balancing" << std::endl;
+      //
       balance[1] = balance[0] > 1 ? p->left->get_balance() : p->right->get_balance();
       return Node::do_rebalance_cases(p, balance[0] > 0, balance[1] > 0);
     }
