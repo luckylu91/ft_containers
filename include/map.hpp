@@ -379,6 +379,8 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       return x;
     }
 
+    // INSERTION / DELETION
+
     static Node *do_rebalance_cases(Node *p, bool isLeft1, bool isLeft2) {
       // Left Left Case
       if (isLeft1 && isLeft2) {
@@ -402,7 +404,10 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       }
     }
 
-    // returns the new root in stead of "p"
+    // INSERTION
+
+    // Insert new_val in p
+    // return the new root where p were (possibly p itself)
     static Node *insert(Node *p, value_type const &new_val, BST &bst) {
       if (p == NULL) {
         return new Node(new_val, bst.comp, bst.alloc);
@@ -432,76 +437,93 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       return Node::do_rebalance_cases(p, balance > 1, new_val < *child);
     }
 
-    static void change_node_parents_child(Node *n1, Node *n2) {
-      if (n1->parent != NULL && n1->parent != n2) {
-        if (n1->is_left_child())
-          n1->parent->left = n2;
-        else
-          n1->parent->right = n2;
+    // DELETION
+
+    static void change_between_n1_n2(Node **n, Node *n1, Node *n2) {
+      if (*n == n1)
+        *n = n2;
+      else if (*n == n2)
+        *n = n1;
+    }
+    static void switch_n1_n2_addresses_in_n(Node *n, Node *n1, Node *n2) {
+      if (n == NULL)
+        return;
+      Node::change_between_n1_n2(&n->left, n1, n2);
+      Node::change_between_n1_n2(&n->right, n1, n2);
+      Node::change_between_n1_n2(&n->parent, n1, n2);
+    }
+    static size_t add_uniquely(Node *(&array)[8], size_t len, Node *n) {
+      for (size_t i = 0; i < len; ++i) {
+        if (array[i] == n)
+          return len;
+      }
+      array[len] = n;
+      return len + 1;
+    }
+    static size_t add_direct_neighbors_of(Node *(&array)[8], size_t len, Node *n) {
+      len = add_uniquely(array, len, n->left);
+      len = add_uniquely(array, len, n->right);
+      len = add_uniquely(array, len, n->parent);
+      return len;
+    }
+    static size_t add_neighborhood_of_n1_n2(Node *(&neighborhood)[8], Node *n1, Node *n2) {
+      size_t len;
+      len = add_direct_neighbors_of(neighborhood, 0, n1);
+      len = add_direct_neighbors_of(neighborhood, len, n2);
+      len = add_uniquely(neighborhood, len, n1);
+      len = add_uniquely(neighborhood, len, n2);
+      return len;
+    }
+    static void switch_n1_n2_addresses_for_neighborhood(Node *n1, Node *n2) {
+      Node *neighborhood[8];
+      size_t len = Node::add_neighborhood_of_n1_n2(neighborhood, n1, n2);
+      for (size_t i = 0; i < len; ++i) {
+        Node::switch_n1_n2_addresses_in_n(neighborhood[i], n1, n2);
       }
     }
-    static void change_left_childs_parent(Node *n1, Node *n2) {
-      if (n1->left != NULL && n1->left != n2)
-        n1->left->parent = n2;
-    }
-    static void change_right_childs_parent(Node *n1, Node *n2) {
-      if (n1->right != NULL && n1->right != n2)
-        n1->right->parent = n2;
-    }
-    static void swap_nodes(Node *n1, Node *n2) {
-      Node::change_node_parents_child(n1, n2);
-      Node::change_node_parents_child(n2, n1);
-      Node::change_left_childs_parent(n1, n2);
-      Node::change_left_childs_parent(n2, n1);
-      Node::change_right_childs_parent(n1, n2);
-      Node::change_right_childs_parent(n2, n1);
+    static void swap_n1_n2_positional_members(Node *n1, Node *n2) {
       std::swap(n1->parent, n2->parent);
       std::swap(n1->left, n2->left);
       std::swap(n1->right, n2->right);
       std::swap(n1->height, n2->height);
       std::swap(n1->oneWasAdded, n2->oneWasAdded);
+
     }
 
-    // static void swap_nodes(Node *n1, Node *n2) {
-    //   std::swap(*n1, *n2);
-    //   std::swap(n1->value, n2->value);
-    // }
+    // Swap two nodes in the tree, preserving the couples (address, value)
+    static void swap_nodes(Node *n1, Node *n2) {
+      Node::switch_n1_n2_addresses_for_neighborhood(n1, n2);
+      Node::swap_n1_n2_positional_members(n1, n2);
+    }
 
     static Node *move_only_child_up(Node *p) {
       Node *child = (p->left != NULL) ? p->left : p->right;
       child->parent = p->parent;
-      // change_node_parents_child (p, child);
       if (child->parent != NULL)
         child->parent->update_height();
-      // p->left = NULL;
-      // p->right = NULL;
-      //
-      std::cout << "Deleting " << p->value->first << std::endl;
-      std::cout << "Moving child up (" << child->value->first << ")" << std::endl;
-      //
       delete p;
       return child;
     }
 
-    static void _print_from_rec(Node *n) {
-      if (n == NULL)
-        return ;
-      std::cout << n->value->first;
-      Node *next = n->next();
-      if (next == NULL)
-        std::cout << "->END";
-      else if (next == n->right)
-        std::cout << "_";
-      else if (next == n->parent)
-        std::cout << "^";
-      else
-        std::cout << "|";
-      _print_from_rec(next);
-    }
-    static void _print_from(Node *n) {
-      _print_from_rec(n);
-      std::cout << std::endl;
-    }
+    // static void _print_from_rec(Node *n) {
+    //   if (n == NULL)
+    //     return ;
+    //   std::cout << n->value->first;
+    //   Node *next = n->next();
+    //   if (next == NULL)
+    //     std::cout << "->END";
+    //   else if (next == n->right)
+    //     std::cout << "_";
+    //   else if (next == n->parent)
+    //     std::cout << "^";
+    //   else
+    //     std::cout << "|";
+    //   _print_from_rec(next);
+    // }
+    // static void _print_from(Node *n) {
+    //   _print_from_rec(n);
+    //   std::cout << std::endl;
+    // }
 
     static Node *remove(Node *p, key_type const &kVal, BST &bst) {
       if (p == NULL) {
@@ -516,9 +538,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       }
       else {
         if (p->left == NULL && p->right == NULL) {
-          //
-          std::cout << "Deleting " << p->value->first << std::endl;
-          //
           delete p;
           bst.oneWasRemoved = true;
           return NULL;
@@ -529,28 +548,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
         }
         else {
           Node *k = p->next();
-          // std::swap(p->value, k->value);
-          // if (p->parent == NULL) {
-          //   std::cout << "Root p = " << p->value->first << std::endl;
-          //   std::cout << "next k = " << k->value->first << std::endl;
-          //   Node::swap_nodes(p, k);
-          //   std::cout << "Now p = " << p->value->first << std::endl;
-          //   std::cout << "Now k = " << k->value->first << std::endl;
-          //   std::cout << "p->left = " << p->left << std::endl;
-          //   std::cout << "p->right = " << p->right << std::endl;
-          // }
-          // else
-          std::cout << "From p : ";
-          Node::_print_from(p);
-          std::cout << "From k : ";
-          Node::_print_from(k);
-          std::cout << "Swapping" << std::endl;
           Node::swap_nodes(p, k);
-          std::cout << "From p : ";
-          Node::_print_from(p);
-          std::cout << "From k : ";
-          Node::_print_from(k);
-
           std::swap(p, k);
           p->right = Node::remove(p->right, kVal, bst);
         }
@@ -560,9 +558,6 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       balance[0] = p->get_balance();
       if (balance[0] >= -1 && balance[0] <= 1)
         return p;
-      //
-      std::cout << "Balancing" << std::endl;
-      //
       balance[1] = balance[0] > 1 ? p->left->get_balance() : p->right->get_balance();
       return Node::do_rebalance_cases(p, balance[0] > 0, balance[1] > 0);
     }
@@ -673,7 +668,7 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       return const_cast<Node*>(const_cast<const Node*>(this)->first_parent_right());
     }
 
-    Node *get_root() const {
+    Node *get_root() {
       if (this->parent == NULL)
         return this;
       return this->parent->get_root();
