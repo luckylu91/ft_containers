@@ -1,8 +1,0 @@
-35,37c35,37
-< (int, int) max size : 2305843009213693951
-< (int, long long int) max size : 1152921504606846975
-< (long long int, long long int) max size : 1152921504606846975
----
-> (int, int) max size : 461168601842738790
-> (int, long long int) max size : 384307168202282325
-> (long long int, long long int) max size : 384307168202282325

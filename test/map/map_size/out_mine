@@ -32,6 +32,6 @@ Actual size = 5
 Map size = 0
 Actual size = 0
 --- Test size ---
-(int, int) max size : 2305843009213693951
-(int, long long int) max size : 1152921504606846975
-(long long int, long long int) max size : 1152921504606846975
+(int, int) max size : 288230376151711743
+(int, long long int) max size : 288230376151711743
+(long long int, long long int) max size : 288230376151711743
