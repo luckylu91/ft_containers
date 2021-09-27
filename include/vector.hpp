@@ -94,13 +94,13 @@ template <typename T>
   >
   : true_type {};
 
-template <typename T, typename Alloc = std::allocator<T> >
+template <typename T, typename ValueAlloc = std::allocator<T> >
 class vector {
  public:
   template <class IteratorType> class Iterator;
 
   typedef T                                              value_type;
-  typedef Alloc                                          allocator_type;
+  typedef ValueAlloc                                          allocator_type;
   typedef T&                                             reference;
   typedef const T&                                       const_reference;
   typedef T*                                             pointer;
@@ -318,12 +318,12 @@ class vector {
   // Non-member function overloads
 
   //Relational operators for vectors
-  friend bool operator== (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
-  friend bool operator!= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return !(lhs == rhs); }
-  friend bool operator<  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
-  friend bool operator>  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
-  friend bool operator>= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return !(lhs < rhs); }
-  friend bool operator<= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return !(lhs > rhs); }
+  friend bool operator== (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+  friend bool operator!= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return !(lhs == rhs); }
+  friend bool operator<  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+  friend bool operator>  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
+  friend bool operator>= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return !(lhs < rhs); }
+  friend bool operator<= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return !(lhs > rhs); }
 
   // Iterators
 
@@ -350,7 +350,7 @@ class vector {
   pointer _array;
   size_type _size;
   size_type _capacity;
-  Alloc _allocator;
+  ValueAlloc _allocator;
 
   void _allocate(size_type new_capacity) {
     _array = _allocator.allocate(new_capacity);
@@ -414,7 +414,7 @@ class vector {
     _array = NULL;
   }
 
-  void _copy(const vector<T, Alloc> &x) {
+  void _copy(const vector<T, ValueAlloc> &x) {
     _destroy_from(0);
     _deallocate();
     _allocate(x._capacity);
@@ -476,7 +476,7 @@ class vector {
     typedef std::random_access_iterator_tag iterator_category;
     typedef std::ptrdiff_t                  difference_type;
     typedef IteratorType                    value_type;
-    typedef Alloc                           allocator_type;
+    typedef ValueAlloc                           allocator_type;
     typedef IteratorType*                   pointer;
     typedef IteratorType&                   reference;
 

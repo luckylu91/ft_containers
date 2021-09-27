@@ -14,7 +14,7 @@ namespace ft {
 template <class Key,
           class T,
           class KeyCompare = std::less<Key>,
-          class Alloc = std::allocator<pair<const Key,T> > >
+          class ValueAlloc = std::allocator<pair<const Key,T> > >
 class map {
  public:
   class BST;
@@ -25,7 +25,7 @@ class map {
   typedef T                                        mapped_type;
   typedef pair<const key_type,mapped_type>         value_type;
   typedef KeyCompare                               key_compare;
-  typedef Alloc                                    allocator_type;
+  typedef ValueAlloc                                    allocator_type;
   typedef typename allocator_type::reference       reference;
   typedef typename allocator_type::const_reference const_reference;
   typedef typename allocator_type::pointer         pointer;
@@ -195,7 +195,7 @@ class map {
 // Allocator
 
   // Get allocator (public member function )
-  allocator_type get_allocator() const { return this->_tree.get_allocator(); }
+  allocator_type get_allocator() const { return this->_tree.get_value_allocator(); }
 
   template <class IteratorType>
     class Iterator {
@@ -203,7 +203,7 @@ class map {
     typedef std::bidirectional_iterator_tag iterator_category;
     typedef std::ptrdiff_t difference_type;
     typedef IteratorType value_type;
-    typedef Alloc allocator_type;
+    typedef ValueAlloc allocator_type;
     typedef IteratorType* pointer;
     typedef IteratorType& reference;
 
@@ -287,8 +287,8 @@ class map {
   allocator_type _alloc;
 };
 
-template <class KeyType, class MappedType, class KeyCompare, class Alloc>
-class map<KeyType, MappedType, KeyCompare, Alloc>::value_compare
+template <class KeyType, class MappedType, class KeyCompare, class ValueAlloc>
+class map<KeyType, MappedType, KeyCompare, ValueAlloc>::value_compare
 {
 public:
   KeyCompare kComp;
@@ -301,24 +301,26 @@ public:
   }
 };
 
-template <class KeyType, class MappedType, class KeyCompare, class Alloc>
-class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
+template <class KeyType, class MappedType, class KeyCompare, class ValueAlloc>
+class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
  public:
-  typedef KeyType key_type;
-  typedef MappedType mapped_type;
-  typedef pair<const key_type, mapped_type> value_type;
-  typedef KeyCompare key_compare;
-  // typedef ValueCompare value_compare;
-  typedef typename map::value_compare value_compare;
-  typedef Alloc allocator_type;
+  struct Node;
+
+  typedef KeyType                                           key_type;
+  typedef MappedType                                        mapped_type;
+  typedef pair<const key_type, mapped_type>                 value_type;
+  typedef KeyCompare                                        key_compare;
+  typedef typename map::value_compare                       value_compare;
+  typedef ValueAlloc                                        value_allocator_type;
+  typedef typename ValueAlloc::template rebind<Node>::other node_allocator_type;
 
   friend class map;
 
   struct Node {
-    Node(value_type const & val, value_compare & comp, allocator_type & alloc)
-      : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), kComp(comp.kComp), comp(comp), alloc(alloc), oneWasAdded(true) {
-        this->value = this->alloc.allocate(1);
-        this->alloc.construct(this->value, val);
+    Node(value_type const & val, BST & bst)
+    : value(NULL), left(NULL), right(NULL), parent(NULL), height(1), bst(bst), kComp(bst.kComp), comp(bst.comp), oneWasAdded(true) {//kComp(comp.kComp), comp(comp), value_alloc(value_alloc), node_alloc(node_alloc), oneWasAdded(true) {
+        this->value = this->bst.value_alloc.allocate(1);
+        this->bst.value_alloc.construct(this->value, val);
         lastAdded = this;
     }
 
@@ -333,8 +335,8 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     }
 
     ~Node() {
-      alloc.destroy(this->value);
-      alloc.deallocate(this->value, 1);
+      this->bst.value_alloc.destroy(this->value);
+      this->bst.value_alloc.deallocate(this->value, 1);
     }
 
     static void set_parent(Node *n, Node *p) {
@@ -410,7 +412,11 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     // return the new root where p were (possibly p itself)
     static Node *insert(Node *p, value_type const &new_val, BST &bst) {
       if (p == NULL) {
-        return new Node(new_val, bst.comp, bst.alloc);
+        node_allocator_type node_alloc = bst.get_node_allocator();
+        Node *n = node_alloc.allocate(1);
+        node_alloc.construct(n, new_val, bst);
+        return n;
+        // return new Node(new_val, bst);
       }
       if (new_val < *p) {
         p->left = Node::insert(p->left, new_val, bst);
@@ -702,14 +708,14 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
       delete p;
     }
 
-    static Node *deepcopy(Node const *p, Node *pCopyParent, value_compare & comp, allocator_type & alloc) {
+    static Node *deepcopy(Node const *p, Node *pCopyParent) {
       if (p == NULL)
         return (NULL);
-      Node *pCopy = new Node(*p->value, comp, alloc);
+      Node *pCopy = new Node(*p->value, p->bst);
       pCopy->parent = pCopyParent;
       pCopy->height = p->height;
-      pCopy->left = deepcopy(p->left, pCopy, comp, alloc);
-      pCopy->right = deepcopy(p->right, pCopy, comp, alloc);
+      pCopy->left = deepcopy(p->left, pCopy);
+      pCopy->right = deepcopy(p->right, pCopy);
       return pCopy;
     }
 
@@ -717,9 +723,10 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     int get_balance() { return node_height(this->left) - node_height(this->right); }
     Node *get_last_added() { return this->lastAdded; }
     bool get_one_was_added() { return this->oneWasAdded; }
-    allocator_type get_allocator() const { return this->alloc; };
-    value_compare get_key_comparator() const { return this->kComp; };
-    value_compare get_value_comparator() const { return this->comp; };
+    // value_allocator_type get_value_allocator() const { return this->bst.value_alloc; };
+    // value_allocator_type get_node_allocator() const { return this->bst.node_alloc; };
+    // value_compare get_key_comparator() const { return this->bst.kComp; };
+    // value_compare get_value_comparator() const { return this->bst.comp; };
     value_type *get_value() const { return this->value; }
 
     friend bool operator<(Node const & a, value_type const & b) { return a.comp(*a.value, b); }
@@ -741,20 +748,22 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
     Node *right;
     Node *parent;
     int height;
+    BST & bst;
     key_compare &kComp;
     value_compare &comp;
-    allocator_type &alloc;
+    // value_allocator_type &value_alloc;
+    // node_allocator_type &node_alloc;
     Node *lastAdded;
     bool oneWasAdded;
   };
 
 
   BST(const key_compare& kComp = key_compare(),
-      allocator_type const & alloc = allocator_type())
-    : root(NULL), kComp(kComp), comp(kComp), alloc(alloc), oneWasRemoved(false) {}
+      allocator_type const & value_alloc = value_allocator_type())
+    : root(NULL), kComp(kComp), comp(kComp), value_alloc(value_alloc), node_alloc(value_alloc), oneWasRemoved(false) {}
 
-  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.kComp), alloc(x.alloc), oneWasRemoved(x.oneWasRemoved) {
-    this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
+  BST(BST const & x): root(NULL), kComp(x.kComp), comp(x.kComp), value_alloc(x.value_alloc), node_alloc(x.value_alloc), oneWasRemoved(x.oneWasRemoved) {
+    this->root = Node::deepcopy(x.root, NULL);
   }
 
   ~BST() {
@@ -826,14 +835,15 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
 
   BST &operator=(BST const &x) {
     this->clear();
-    this->root = Node::deepcopy(x.root, NULL, this->comp, this->alloc);
+    this->root = Node::deepcopy(x.root, NULL);
     return *this;
   }
 
   friend bool operator==(BST const & a, BST const & b) { return a.root == b.root; }
   friend bool operator!=(BST const & a, BST const & b) { return a.root != b.root; }
 
-  allocator_type get_allocator() const { return this->alloc; };
+  value_allocator_type get_value_allocator() const { return this->value_alloc; };
+  node_allocator_type get_node_allocator() const { return this->node_alloc; };
   value_compare get_key_comparator() const { return this->kComp; };
   value_compare get_value_comparator() const { return this->comp; };
 
@@ -842,7 +852,9 @@ class map<KeyType, MappedType, KeyCompare, Alloc>::BST {
   Node *root;
   key_compare kComp;
   value_compare comp;
-  allocator_type alloc;
+  value_allocator_type value_alloc;
+  node_allocator_type node_alloc;
+
   bool oneWasRemoved;
 };
 

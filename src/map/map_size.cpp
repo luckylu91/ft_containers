@@ -11,20 +11,36 @@ struct StaticCounter {
 
 int StaticCounter::total = 0;
 
-void test()
+void test_size()
 {
-  map<int, StaticCounter> m0;
+  map<int, StaticCounter> m;
   for (int i = 0; i < 10; ++i) {
-    m0.insert(make_pair(i, StaticCounter()));
-    std::cout << "Map size = " << m0.size() << std::endl;
+    m.insert(make_pair(i, StaticCounter()));
+    std::cout << "Map size = " << m.size() << std::endl;
     std::cout << "Actual size = " << StaticCounter::total << std::endl;
   }
   for (int i = 0; i < 5; ++i) {
-    m0.erase(i);
-    std::cout << "Map size = " << m0.size() << std::endl;
+    m.erase(i);
+    std::cout << "Map size = " << m.size() << std::endl;
     std::cout << "Actual size = " << StaticCounter::total << std::endl;
   }
-  m0.clear();
-  std::cout << "Map size = " << m0.size() << std::endl;
+  m.clear();
+  std::cout << "Map size = " << m.size() << std::endl;
   std::cout << "Actual size = " << StaticCounter::total << std::endl;
+}
+
+void test_max_size() {
+  map<int, int> m1;
+  std::cout << "(int, int) max size : " << m1.max_size() << std::endl;
+  map<int, long long int> m2;
+  std::cout << "(int, long long int) max size : " << m2.max_size() << std::endl;
+  map<long long int, long long int> m3;
+  std::cout << "(long long int, long long int) max size : " << m3.max_size() << std::endl;
+}
+
+void test() {
+  std::cout << "--- Test size ---" << std::endl;
+  test_size();
+  std::cout << "--- Test size ---" << std::endl;
+  test_max_size();
 }

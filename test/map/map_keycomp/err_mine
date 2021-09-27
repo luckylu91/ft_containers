@@ -1,0 +1,82 @@
+=================================================================
+==10570==ERROR: AddressSanitizer: heap-use-after-free on address 0x602000000110 at pc 0x0001030efbc2 bp 0x7ffeecb16c60 sp 0x7ffeecb16c58
+READ of size 4 at 0x602000000110 thread T0
+    #0 0x1030efbc1 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::value_compare::operator()(ft::pair<int const, int> const&, ft::pair<int const, int> const&) const map.hpp:300
+    #1 0x1030eedba in ft::operator<(ft::pair<int const, int> const&, ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node const&) map.hpp:735
+    #2 0x1030edef9 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::insert(ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node*, ft::pair<int const, int> const&, ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST&) map.hpp:421
+    #3 0x1030ed813 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::insert(ft::pair<int const, int> const&) map.hpp:775
+    #4 0x1030eafcf in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::insert(ft::pair<int const, int> const&) map.hpp:108
+    #5 0x1030ea0c5 in void insert<int, int, KeyCompareInt>(ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >&, int, int) test_map.h:42
+    #6 0x1030e9a3e in test_int() map_keycomp.cpp:7
+    #7 0x1030ea3a8 in test() map_keycomp.cpp:24
+    #8 0x1030f11a3 in main main.cpp:9
+    #9 0x7fff57f233d4 in start (libdyld.dylib:x86_64+0x163d4)
+
+0x602000000110 is located 0 bytes inside of 8-byte region [0x602000000110,0x602000000118)
+freed by thread T0 here:
+    #0 0x103171b02 in wrap__ZdlPv (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6eb02)
+    #1 0x1030eaa14 in std::__1::_DeallocateCaller::__do_call(void*) new:320
+    #2 0x1030ea9f8 in std::__1::_DeallocateCaller::__do_deallocate_handle_size(void*, unsigned long) new:278
+    #3 0x1030ea9d0 in std::__1::_DeallocateCaller::__do_deallocate_handle_size_align(void*, unsigned long, unsigned long) new:248
+    #4 0x1030ea9a4 in std::__1::__libcpp_deallocate(void*, unsigned long, unsigned long) new:326
+    #5 0x1030ea954 in std::__1::allocator<ft::pair<int const, int> >::deallocate(ft::pair<int const, int>*, unsigned long) memory:1817
+    #6 0x1030ea8ff in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::~Node() map.hpp:339
+    #7 0x1030ea7e4 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::~Node() map.hpp:337
+    #8 0x1030ede70 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::insert(ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node*, ft::pair<int const, int> const&, ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST&) map.hpp:417
+    #9 0x1030ed813 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::insert(ft::pair<int const, int> const&) map.hpp:775
+    #10 0x1030eafcf in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::insert(ft::pair<int const, int> const&) map.hpp:108
+    #11 0x1030ea0c5 in void insert<int, int, KeyCompareInt>(ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >&, int, int) test_map.h:42
+    #12 0x1030e9a3e in test_int() map_keycomp.cpp:7
+    #13 0x1030ea3a8 in test() map_keycomp.cpp:24
+    #14 0x1030f11a3 in main main.cpp:9
+    #15 0x7fff57f233d4 in start (libdyld.dylib:x86_64+0x163d4)
+
+previously allocated by thread T0 here:
+    #0 0x103171502 in wrap__Znwm (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x6e502)
+    #1 0x1030ef578 in std::__1::__libcpp_allocate(unsigned long, unsigned long) new:239
+    #2 0x1030efa97 in std::__1::allocator<ft::pair<int const, int> >::allocate(unsigned long, void const*) memory:1814
+    #3 0x1030ef91d in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::Node(ft::pair<int const, int> const&, ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST&) map.hpp:322
+    #4 0x1030eed14 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::Node(ft::pair<int const, int> const&, ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST&) map.hpp:321
+    #5 0x1030ede45 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node::insert(ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::Node*, ft::pair<int const, int> const&, ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST&) map.hpp:417
+    #6 0x1030ed813 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::BST::insert(ft::pair<int const, int> const&) map.hpp:775
+    #7 0x1030eafcf in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::insert(ft::pair<int const, int> const&) map.hpp:108
+    #8 0x1030ea0c5 in void insert<int, int, KeyCompareInt>(ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >&, int, int) test_map.h:42
+    #9 0x1030e9a3e in test_int() map_keycomp.cpp:7
+    #10 0x1030ea3a8 in test() map_keycomp.cpp:24
+    #11 0x1030f11a3 in main main.cpp:9
+    #12 0x7fff57f233d4 in start (libdyld.dylib:x86_64+0x163d4)
+
+SUMMARY: AddressSanitizer: heap-use-after-free map.hpp:300 in ft::map<int, int, KeyCompareInt, std::__1::allocator<ft::pair<int const, int> > >::value_compare::operator()(ft::pair<int const, int> const&, ft::pair<int const, int> const&) const
+Shadow bytes around the buggy address:
+  0x1c03ffffffd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c03ffffffe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c03fffffff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c0400000000: fa fa fd fd fa fa fd fd fa fa 00 00 fa fa 00 05
+  0x1c0400000010: fa fa 00 00 fa fa 00 04 fa fa 00 00 fa fa 00 06
+=>0x1c0400000020: fa fa[fd]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==10570==ABORTING
