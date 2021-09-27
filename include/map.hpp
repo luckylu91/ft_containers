@@ -22,23 +22,23 @@ class map {
   class Iterator;
   class value_compare;
 
-  typedef Key key_type;
-  typedef T mapped_type;
-  typedef pair<const key_type, mapped_type> value_type;
-  typedef KeyCompare key_compare;
-  typedef ValueAlloc allocator_type;
-  typedef typename allocator_type::reference reference;
-  typedef typename allocator_type::const_reference const_reference;
-  typedef typename allocator_type::pointer pointer;
-  typedef typename allocator_type::const_pointer const_pointer;
-  typedef typename allocator_type::difference_type difference_type;
-  typedef typename allocator_type::size_type size_type;
-  typedef BST bst_type;
-  typedef typename BST::Node bst_node_type;
-  typedef Iterator<value_type, bst_node_type> iterator;
+  typedef Key                                             key_type;
+  typedef T                                               mapped_type;
+  typedef pair<const key_type, mapped_type>               value_type;
+  typedef KeyCompare                                      key_compare;
+  typedef ValueAlloc                                      allocator_type;
+  typedef typename allocator_type::reference              reference;
+  typedef typename allocator_type::const_reference        const_reference;
+  typedef typename allocator_type::pointer                pointer;
+  typedef typename allocator_type::const_pointer          const_pointer;
+  typedef typename allocator_type::difference_type        difference_type;
+  typedef typename allocator_type::size_type              size_type;
+  typedef BST                                             bst_type;
+  typedef typename BST::Node                              bst_node_type;
+  typedef Iterator<value_type, bst_node_type>             iterator;
   typedef Iterator<const value_type, const bst_node_type> const_iterator;
-  typedef std::reverse_iterator<iterator> reverse_iterator;
-  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef std::reverse_iterator<iterator>                 reverse_iterator;
+  typedef std::reverse_iterator<const_iterator>           const_reverse_iterator;
 
   // Construct map (public member function )
   // empty (1)
@@ -277,13 +277,6 @@ class map {
       return !(a == b);
     }
 
-    // void _print() {
-    //   std::cout << "Iterator (" << std::endl;
-    //   std::cout << "bst = " << bst << "," << std::endl;
-    //   std::cout << "current = " << current << "," << std::endl;
-    //   std::cout << "isEnd = " << isEnd << ")" << std::endl;
-    // }
-
    private:
     bst_type const *bst;
     node_type *current;
@@ -313,7 +306,10 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::value_compare {
   }
 };
 
-template <class KeyType, class MappedType, class KeyCompare, class ValueAlloc>
+template <class KeyType,
+          class MappedType,
+          class KeyCompare,
+          class ValueAlloc>
 class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
  public:
   struct Node;
@@ -562,21 +558,21 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
     if (p == NULL) {
       return bst.new_node(new_val);
     }
+    Node *p_son;
     if (new_val < *p) {
       p->left = Node::insert(p->left, new_val, bst);
-      p->left->parent = p;
-      p->lastAdded = p->left->lastAdded;
-      p->oneWasAdded = p->left->oneWasAdded;
+      p_son = p->left;
     } else if (*p < new_val) {
       p->right = Node::insert(p->right, new_val, bst);
-      p->right->parent = p;
-      p->lastAdded = p->right->lastAdded;
-      p->oneWasAdded = p->right->oneWasAdded;
+      p_son = p->right;
     } else {
       p->lastAdded = p;
       p->oneWasAdded = false;
       return p;
     }
+    p_son->parent = p;
+    p->lastAdded = p_son->lastAdded;
+    p->oneWasAdded = p_son->oneWasAdded;
     p->update_height();
     return Node::rebalance_after_insert(p, new_val);
   }
@@ -632,7 +628,6 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
     std::swap(n1->height, n2->height);
     std::swap(n1->oneWasAdded, n2->oneWasAdded);
   }
-
   // Swap two nodes in the tree, preserving the couples (address, value)
   static void swap_nodes(Node *n1, Node *n2) {
     Node::switch_n1_n2_addresses_for_neighborhood(n1, n2);
@@ -654,26 +649,6 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
     bst.oneWasRemoved = true;
     return NULL;
   }
-
-  // static void _print_from_rec(Node *n) {
-  //   if (n == NULL)
-  //     return ;
-  //   std::cout << n->value->first;
-  //   Node *next = n->next();
-  //   if (next == NULL)
-  //     std::cout << "->END";
-  //   else if (next == n->right)
-  //     std::cout << "_";
-  //   else if (next == n->parent)
-  //     std::cout << "^";
-  //   else
-  //     std::cout << "|";
-  //   _print_from_rec(next);
-  // }
-  // static void _print_from(Node *n) {
-  //   _print_from_rec(n);
-  //   std::cout << std::endl;
-  // }
 
   static Node *rebalance_after_remove(Node *p) {
     int balance[2];
@@ -727,19 +702,6 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
   static Node *find(Node *p, key_type const &kVal) {
     return const_cast<Node *>(find(const_cast<const Node *>(p), kVal));
   }
-  //   static Node *find(Node *p, key_type const & kVal) {
-  //   if (p == NULL)
-  //     return NULL;
-  //   if (kVal < *p) {
-  //     return Node::find(p->left, kVal);
-  //   }
-  //   else if (kVal > *p) {
-  //     return Node::find(p->right, kVal);
-  //   }
-  //   else {
-  //     return p;
-  //   }
-  // }
 
   static Node *lower_bound(Node *p, key_type const &kVal) {
     if (p == NULL)
@@ -757,9 +719,6 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
     } else
       return p;
   }
-  // static Node const *lower_bound(Node const *p, key_type const & kVal) {
-  //   return const_cast<Node*>(const_cast<const Node*>(this)->leftmost_child());
-  // }
 
   static Node *upper_bound(Node *p, key_type const &kVal) {
     if (p == NULL)

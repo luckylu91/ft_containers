@@ -1,0 +1,21 @@
+  // static void _print_from_rec(Node *n) {
+  //   if (n == NULL)
+  //     return ;
+  //   std::cout << n->value->first;
+  //   Node *next = n->next();
+  //   if (next == NULL)
+  //     std::cout << "->END";
+  //   else if (next == n->right)
+  //     std::cout << "_";
+  //   else if (next == n->parent)
+  //     std::cout << "^";
+  //   else
+  //     std::cout << "|";
+  //   _print_from_rec(next);
+  // }
+  // static void _print_from(Node *n) {
+  //   _print_from_rec(n);
+  //   std::cout << std::endl;
+  // }
+
+  
