@@ -197,8 +197,34 @@ class map {
   // Get allocator (public member function )
   allocator_type get_allocator() const { return this->_tree.get_value_allocator(); }
 
-  template <class ValueType, class NodeType>
-  class Iterator {
+
+
+template <class KeyType,
+          class MappedType,
+          class KeyCompare,
+          class ValueAlloc>
+struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::value_compare {
+  typedef bool result_type;
+  typedef key_type first_argument_type;
+  typedef mapped_type second_argument_type;
+
+  value_compare(KeyCompare c) : kComp(c) {}
+  bool operator()(const value_type &x, const value_type &y) const {
+    return kComp(x.first, y.first);
+  }
+
+  KeyCompare kComp;
+};
+
+
+
+template <class Key,
+          class T,
+          class KeyCompare,
+          class ValueAlloc,
+          class ValueType,
+          class NodeType>
+  class map<KeyType, MappedType, KeyCompare, ValueAlloc>::Iterator<ValueType, NodeType> {
    public:
     typedef std::bidirectional_iterator_tag iterator_category;
     typedef std::ptrdiff_t                  difference_type;
@@ -285,22 +311,9 @@ class map {
   allocator_type _alloc;
 };
 
-template <class KeyType,
-          class MappedType,
-          class KeyCompare,
-          class ValueAlloc>
-struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::value_compare {
-  typedef bool result_type;
-  typedef key_type first_argument_type;
-  typedef mapped_type second_argument_type;
 
-  value_compare(KeyCompare c) : kComp(c) {}
-  bool operator()(const value_type &x, const value_type &y) const {
-    return kComp(x.first, y.first);
-  }
 
-  KeyCompare kComp;
-};
+
 
 template <class KeyType,
           class MappedType,
