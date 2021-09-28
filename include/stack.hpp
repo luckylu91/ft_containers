@@ -36,12 +36,12 @@ struct stack {
   // Remove top element (public member function )
   void pop() { c.pop_back(); }
 
-    friend bool operator== (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs == rhs; }
-    friend bool operator!= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs != rhs; }
-    friend bool operator<  (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs < rhs; }
-    friend bool operator<= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs <= rhs; }
-    friend bool operator>  (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs > rhs; }
-    friend bool operator>= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs >= rhs; }
+  friend bool operator== (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c == rhs.c; }
+  friend bool operator!= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c != rhs.c; }
+  friend bool operator<  (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c < rhs.c; }
+  friend bool operator<= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c <= rhs.c; }
+  friend bool operator>  (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c > rhs.c; }
+  friend bool operator>= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c >= rhs.c; }
 };
 
 } // namespace ft

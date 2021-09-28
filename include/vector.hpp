@@ -8,15 +8,14 @@
 #include "equal.hpp"
 #include "lexicographical_compare.hpp"
 
-//
-#include <iostream>
-
 #define MIN_CAPACITY 5
 #define RESIZE_MARGIN 10
 #define RESERVE_MARGIN 10
 #define ASSIGN_MARGIN 10
 
 namespace ft {
+
+// TEMPLATE TYPES META-PROGRAMMING
 
 // true_type
 struct true_type { static const bool value = true; };
@@ -94,6 +93,9 @@ template <typename T>
   >
   : true_type {};
 
+
+// VECTOR
+
 template <typename T, typename ValueAlloc = std::allocator<T> >
 class vector {
  public:
@@ -113,6 +115,7 @@ class vector {
   typedef typename std::reverse_iterator<const_iterator> const_reverse_iterator;
 
  private:
+
   struct _range {
     size_type       start;
     size_type       stop;
@@ -123,14 +126,15 @@ class vector {
   };
 
  public:
+
   // Constructors, Destructor, Assign operation
 
-  /*explicit*/ vector(const allocator_type &alloc = allocator_type())
+  explicit vector(const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
     _allocate(MIN_CAPACITY);
   }
 
-  /*explicit*/ vector(size_type n, const value_type &val = value_type(),
+  explicit vector(size_type n, const value_type &val = value_type(),
                   const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(n), _allocator(alloc) {
     _allocate(n);
@@ -139,7 +143,6 @@ class vector {
 
   template <class InputIterator>
   vector(InputIterator first,
-        //  typename enable_if_t<is_iterator<InputIterator>::value, InputIterator>::type last,
          typename enable_if_t<!is_integral<InputIterator>::value, InputIterator>::type last,
          const allocator_type &alloc = allocator_type())
       : _array(NULL), _size(0), _capacity(MIN_CAPACITY), _allocator(alloc) {
@@ -153,8 +156,8 @@ class vector {
 
   ~vector() {
     if (_array != NULL) {
-      this->_destroy_from(0);
-      this->_deallocate();
+      _destroy_from(0);
+      _deallocate();
     }
   }
 
@@ -163,7 +166,7 @@ class vector {
     return *this;
   }
 
-  // Capacity
+  // CAPACITY
 
   //Return size (public member function )
   size_type size() const { return _size; }
@@ -194,7 +197,8 @@ class vector {
       _enlarge(n + RESERVE_MARGIN);
   }
 
-  // Element access
+
+  // ELEMENT ACCESS
 
   //Access element (public member function )
   reference operator[](size_type n) { return _array[n]; };
@@ -220,7 +224,8 @@ class vector {
   reference back() { return _array[_size - 1]; }
   const_reference back() const { return _array[_size - 1]; }
 
-  // Modifiers
+
+  // MODIFIERS
 
   //Assign vector content (public member function )
   template <class InputIterator>
@@ -310,35 +315,48 @@ class vector {
     _allocate(MIN_CAPACITY);
   }
 
-  // Allocator
 
-  //Get allocator (public member function )
+  // ALLOCATOR
+
+  // Get allocator (public member function )
   allocator_type get_allocator() const { return _allocator; }
 
-  // Non-member function overloads
 
-  //Relational operators for vectors
-  friend bool operator== (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
-  friend bool operator!= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return !(lhs == rhs); }
-  friend bool operator<  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
-  friend bool operator>  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
-  friend bool operator>= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return !(lhs < rhs); }
-  friend bool operator<= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs) { return !(lhs > rhs); }
+  // RELATIONAL OPERATORS
+  friend bool operator== (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
+    { return equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+
+  friend bool operator!= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
+    { return !(lhs == rhs); }
+
+  friend bool operator<  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
+    { return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+
+  friend bool operator>  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
+    { return lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
+
+  friend bool operator>= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
+    { return !(lhs < rhs); }
+
+  friend bool operator<= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
+    { return !(lhs > rhs); }
+
+
 
   // Iterators
 
   //Return iterator to beginning
-  iterator begin() { return iterator(_array); }
-  const_iterator begin() const { return const_iterator(_array); }
+  iterator begin()                      { return iterator(_array); }
+  const_iterator begin() const          { return const_iterator(_array); }
   //Return iterator to end
-  iterator end() { return _array != NULL ? iterator(_array + _size) : iterator(); }
-  const_iterator end() const { return _array != NULL ? const_iterator(_array + _size) : const_iterator(); }
+  iterator end()                        { return _array != NULL ? iterator(_array + _size) : iterator(); }
+  const_iterator end() const            { return _array != NULL ? const_iterator(_array + _size) : const_iterator(); }
   //Return reverse iterator to reverse beginning
-  reverse_iterator rbegin() { return _array != NULL ? reverse_iterator(_array + _size) : reverse_iterator(); }
+  reverse_iterator rbegin()             { return _array != NULL ? reverse_iterator(_array + _size) : reverse_iterator(); }
   //Return reverse iterator to reverse end
   const_reverse_iterator rbegin() const { return _array != NULL ? const_reverse_iterator(_array + _size) : const_reverse_iterator(); }
-  reverse_iterator rend() { return reverse_iterator(_array); }
-  const_reverse_iterator rend() const { return const_reverse_iterator(_array); }
+  reverse_iterator rend()               { return reverse_iterator(_array); }
+  const_reverse_iterator rend() const   { return const_reverse_iterator(_array); }
 
   //Exchange contents of vectors
   friend void swap(vector &x, vector &y) {
@@ -347,9 +365,9 @@ class vector {
 
 
  private:
-  pointer _array;
-  size_type _size;
-  size_type _capacity;
+  pointer    _array;
+  size_type  _size;
+  size_type  _capacity;
   ValueAlloc _allocator;
 
   void _allocate(size_type new_capacity) {

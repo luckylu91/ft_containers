@@ -1,4 +1,4 @@
-#include "test_vector.h"
+#include "test_vector.hpp"
 
 class A {
   static int _ccpt;

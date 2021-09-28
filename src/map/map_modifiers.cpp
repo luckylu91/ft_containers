@@ -1,4 +1,4 @@
-#include "test_map.h"
+#include "test_map.hpp"
 
 void insert_many(map<int, int> & container, int n) {
   for (int i = 0; i < n; ++i) {

@@ -1,4 +1,4 @@
-#include "test_vector.h"
+#include "test_vector.hpp"
 
 void test_iterator_types() {
   vector<int> intVect;

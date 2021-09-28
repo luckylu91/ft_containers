@@ -1,16 +1,10 @@
 #pragma once
-#include "test_all.h"
+#include "test_all.hpp"
 #ifdef MINE
   #include "map.hpp"
-  // using ft::pair;
-  // using ft::make_pair;
-  // using ft::map;
   using namespace ft;
 #else
   #include <map>
-  // using std::pair;
-  // using std::make_pair;
-  // using std::map;
   using namespace std;
 #endif
 
@@ -20,7 +14,7 @@ std::ostream & operator<<(std::ostream & os, pair<C1, C2> const & p) {
   return os;
 }
 
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 struct KeyCompareInt {
   bool operator() (int x, int y) const { return -x / 2 < - y / 2; }

@@ -18,8 +18,8 @@ TEST_DIFF="$TEST_PATH/diff"
 mkdir -p $TEST_PATH
 echo -n "Test $TEST_NAME..."
 
-$2 > $TEST_STDOUT_MINE 2> $TEST_STDERR_MINE
-$3 > $TEST_STDOUT_STD 2> $TEST_STDERR_STD
+$2 1> $TEST_STDOUT_MINE 2> $TEST_STDERR_MINE
+$3 1> $TEST_STDOUT_STD 2> $TEST_STDERR_STD
 
 diff $TEST_STDOUT_MINE $TEST_STDOUT_STD > $TEST_DIFF
 if [ -s "$TEST_DIFF" ]; then
@@ -28,12 +28,12 @@ else
   echo -e "[$GREEN""OK""$NC""]"
 fi
 
-# leaks -atExit -- $2 > $TEST_LEAKS_MINE
-# if [[ $? -ne 0 ]]; then
-#   echo -e "    -> ""$RED""LEAKS""$NC"
-# fi
+leaks -atExit -- $2 1>/dev/null 2> $TEST_LEAKS_MINE
+if [[ $? -ne 0 ]]; then
+  echo -e "    -> ""$RED""LEAKS""$NC"
+fi
 
-# leaks -atExit -- $3 > $TEST_LEAKS_STD
-# if [[ $? -ne 0 ]]; then
-#   echo -e "    -> ""$RED""LEAKS_STD""$NC"
-# fi
+leaks -atExit -- $3 1>/dev/null 2> $TEST_LEAKS_STD
+if [[ $? -ne 0 ]]; then
+  echo -e "    -> ""$RED""LEAKS_STD""$NC"
+fi

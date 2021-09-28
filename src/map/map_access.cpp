@@ -1,4 +1,4 @@
-#include "test_map.h"
+#include "test_map.hpp"
 
 void test() {
   map<int, int> m;

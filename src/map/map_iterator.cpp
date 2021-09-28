@@ -1,4 +1,4 @@
-#include "test_map.h"
+#include "test_map.hpp"
 
 void test_iterator_types() {
   map<int, int> bst;

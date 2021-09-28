@@ -1,4 +1,4 @@
-#include "test_vector.h"
+#include "test_vector.hpp"
 
 void all_comparisons(vector<int> const & a, vector<int> const & b) {
   std::boolalpha(std::cout);
