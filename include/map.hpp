@@ -16,11 +16,12 @@ template <class Key,
           class KeyCompare = std::less<Key>,
           class ValueAlloc = std::allocator<pair<const Key, T> > >
 class map {
- public:
+ private:
   class BST;
+ public:
   template <class ValueType, class NodeType>
-  class Iterator;
-  class value_compare;
+    class Iterator;
+  struct value_compare;
 
   typedef Key                                             key_type;
   typedef T                                               mapped_type;
@@ -136,7 +137,6 @@ class map {
     iterator current;
     while (first != last) {
       iterator current = first++;
-      // std::cout << "Current : " << current->first << std::endl;
       this->erase(current);
     }
   }
@@ -190,10 +190,6 @@ class map {
   }
   pair<iterator, iterator> equal_range(const key_type &k) {
     return pair<iterator, iterator>(this->_tree.equal_range(k));
-    // pair<iterator, iterator> p = this->_tree.equal_range(k);
-    // std::cout << "first : " << p.first->first << "," << p.first->second << std::endl;
-    // std::cout << "second : " << p.second->first << "," << p.second->second << std::endl;
-    // return p;
   }
 
   // Allocator
@@ -205,12 +201,12 @@ class map {
   class Iterator {
    public:
     typedef std::bidirectional_iterator_tag iterator_category;
-    typedef std::ptrdiff_t difference_type;
-    typedef ValueType value_type;
-    typedef ValueAlloc allocator_type;
-    typedef ValueType *pointer;
-    typedef ValueType &reference;
-    typedef NodeType node_type;
+    typedef std::ptrdiff_t                  difference_type;
+    typedef ValueType                       value_type;
+    typedef ValueAlloc                      allocator_type;
+    typedef ValueType                       *pointer;
+    typedef ValueType                       &reference;
+    typedef NodeType                        node_type;
 
     Iterator() : bst(NULL), current(NULL), isEnd(true) {}
 
@@ -236,7 +232,6 @@ class map {
     reference operator*() const { return *current->get_value(); }
     pointer operator->() const { return current->get_value(); }
     Iterator &operator++() {
-      // std::cout << "current : " << current->get_value()->first << std::endl;
       node_type *n = this->current->next();
       if (n != NULL)
         this->current = n;
@@ -294,16 +289,17 @@ template <class KeyType,
           class MappedType,
           class KeyCompare,
           class ValueAlloc>
-class map<KeyType, MappedType, KeyCompare, ValueAlloc>::value_compare {
- public:
-  KeyCompare kComp;
-  value_compare(KeyCompare c) : kComp(c) {}
+struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::value_compare {
   typedef bool result_type;
   typedef key_type first_argument_type;
   typedef mapped_type second_argument_type;
+
+  value_compare(KeyCompare c) : kComp(c) {}
   bool operator()(const value_type &x, const value_type &y) const {
     return kComp(x.first, y.first);
   }
+
+  KeyCompare kComp;
 };
 
 template <class KeyType,
@@ -324,10 +320,14 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
 
   friend class map;
 
-  BST(const key_compare &kComp = key_compare(), allocator_type const &value_alloc = value_allocator_type())
-      : root(NULL), kComp(kComp), comp(kComp), value_alloc(value_alloc), node_alloc(value_alloc), oneWasRemoved(false) {}
+  BST(const key_compare &kComp = key_compare(),
+      allocator_type const &value_alloc = value_allocator_type())
+      : root(NULL), kComp(kComp), comp(kComp), value_alloc(value_alloc),
+        node_alloc(value_alloc), oneWasRemoved(false) {}
 
-  BST(BST const &x) : root(NULL), kComp(x.kComp), comp(x.kComp), value_alloc(x.value_alloc), node_alloc(x.value_alloc), oneWasRemoved(x.oneWasRemoved) {
+  BST(BST const &x)
+      : root(NULL), kComp(x.kComp), comp(x.kComp), value_alloc(x.value_alloc),
+        node_alloc(x.value_alloc), oneWasRemoved(x.oneWasRemoved) {
     this->root = Node::deepcopy(x.root, NULL);
   }
 
@@ -383,8 +383,10 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
       return make_pair(n, n);
   }
   pair<Node *, Node *> equal_range(key_type const &k) {
-    pair<Node const *, Node const *> equal_range_const = const_cast<BST const *>(this)->equal_range(k);
-    return make_pair(const_cast<Node *>(equal_range_const.first), const_cast<Node *>(equal_range_const.second));
+    pair<Node const *, Node const *> equal_range_const = \
+      const_cast<BST const *>(this)->equal_range(k);
+    return make_pair(const_cast<Node *>(equal_range_const.first),
+                     const_cast<Node *>(equal_range_const.second));
   }
 
   size_t get_size() const {
@@ -459,7 +461,8 @@ template <class KeyType,
           class ValueAlloc>
 struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
   Node(value_type const &val, BST &bst)
-      : bst(bst), value(NULL), left(NULL), right(NULL), parent(NULL), height(1), oneWasAdded(true) {
+      : bst(bst), value(NULL), left(NULL), right(NULL), parent(NULL),
+        height(1), oneWasAdded(true) {
     this->value = this->bst.new_value(val);
     lastAdded = this;
   }
@@ -743,6 +746,27 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
     return (1 + Node::get_size(p->left) + Node::get_size(p->right));
   }
 
+  static int node_height(Node *n) { return n == NULL ? 0 : n->height; }
+
+  static void clear(Node *p) {
+    if (p == NULL)
+      return;
+    clear(p->left);
+    clear(p->right);
+    p->bst.delete_node(p);
+  }
+
+  static Node *deepcopy(Node const *p, Node *pCopyParent) {
+    if (p == NULL)
+      return (NULL);
+    Node *pCopy = new Node(*p->value, p->bst);
+    pCopy->parent = pCopyParent;
+    pCopy->height = p->height;
+    pCopy->left = deepcopy(p->left, pCopy);
+    pCopy->right = deepcopy(p->right, pCopy);
+    return pCopy;
+  }
+
   Node const *leftmost_child() const {
     if (this->left == NULL)
       return this;
@@ -815,44 +839,23 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
     return const_cast<Node *>(const_cast<const Node *>(this)->previous());
   }
 
-  static int node_height(Node *n) { return n == NULL ? 0 : n->height; }
-
-  static void clear(Node *p) {
-    if (p == NULL)
-      return;
-    clear(p->left);
-    clear(p->right);
-    p->bst.delete_node(p);
+  void update_height() {
+    this->height = 1 + std::max(node_height(this->left), node_height(this->right));
   }
-
-  static Node *deepcopy(Node const *p, Node *pCopyParent) {
-    if (p == NULL)
-      return (NULL);
-    Node *pCopy = new Node(*p->value, p->bst);
-    pCopy->parent = pCopyParent;
-    pCopy->height = p->height;
-    pCopy->left = deepcopy(p->left, pCopy);
-    pCopy->right = deepcopy(p->right, pCopy);
-    return pCopy;
-  }
-
-  void update_height() { this->height = 1 + std::max(node_height(this->left), node_height(this->right)); }
   int get_balance() { return node_height(this->left) - node_height(this->right); }
   Node *get_last_added() { return this->lastAdded; }
   bool get_one_was_added() { return this->oneWasAdded; }
-  value_type *get_value() const { return this->value; }
+  value_type const *get_value() const { return this->value; }
+  value_type *get_value() { return this->value; }
 
   friend bool operator<(Node const &a, value_type const &b) { return a.bst.comp(*a.value, b); }
-  friend bool operator<(Node const &a, key_type const &b) { return a.bst.kComp(a.value->first, b); }
-
+  friend bool operator<(Node const &a, key_type const &b)   { return a.bst.kComp(a.value->first, b); }
   friend bool operator<(value_type const &a, Node const &b) { return b.bst.comp(a, *b.value); }
-  friend bool operator<(key_type const &a, Node const &b) { return b.bst.kComp(a, b.value->first); }
-
+  friend bool operator<(key_type const &a, Node const &b)   { return b.bst.kComp(a, b.value->first); }
   friend bool operator>(Node const &a, value_type const &b) { return a.bst.comp(b, *a.value); }
-  friend bool operator>(Node const &a, key_type const &b) { return a.bst.kComp(b, a.value->first); }
-
+  friend bool operator>(Node const &a, key_type const &b)   { return a.bst.kComp(b, a.value->first); }
   friend bool operator>(value_type const &a, Node const &b) { return b.bst.comp(*b.value, a); }
-  friend bool operator>(key_type const &a, Node const &b) { return b.bst.kComp(b.value->first, a); }
+  friend bool operator>(key_type const &a, Node const &b)   { return b.bst.kComp(b.value->first, a); }
 
   BST &bst;
   value_type *value;
