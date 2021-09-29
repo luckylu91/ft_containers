@@ -1,7 +1,5 @@
 #include "test_speed.hpp"
 
-#define COUNT (MAX_RAM / (int)sizeof(Buffer))
-
 void test() {
   vector<Buffer> vector_buffer;
   for (int i = 0; i < COUNT; i++) {

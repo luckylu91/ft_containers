@@ -9,21 +9,19 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98 -Iinclude #-g3 -fsanitize=address
 SHELL = /bin/bash
 
 SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
-SUBDIRS_SPEED = $(shell find src_speed -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
-
 TEST_SRCS = $(shell find src -mindepth 2 -type f | grep -v ".dSYM")
-TEST_SPEED_SRCS = $(shell find src_speed -mindepth 2 -type f | grep -v ".dSYM")
-
 SUBDIRS_OBJ = $(addprefix obj/, $(SUBDIRS))
 SUBDIRS_BIN = $(addprefix bin/, $(SUBDIRS))
 SUBDIRS_TEST = $(addprefix test/, $(SUBDIRS))
-SUBDIRS_TEST_SPEED = $(addprefix test_speed/, $(SUBDIRS_SPEED))
-
 OBJS =	$(TEST_SRCS:src/%.cpp=obj/%_mine.o) \
 				$(TEST_SRCS:src/%.cpp=obj/%_std.o) \
 				obj/main.o
 TESTS =				$(TEST_SRCS:src/%.cpp=test/%)
 TESTS_RULES =	$(TEST_SRCS:src/%.cpp=test_rule/%)
+
+SUBDIRS_SPEED = $(shell find src_speed -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
+TEST_SPEED_SRCS = $(shell find src_speed -mindepth 2 -type f | grep -v ".dSYM")
+SUBDIRS_TEST_SPEED = $(addprefix test_speed/, $(SUBDIRS_SPEED))
 TESTS_SPEED =	$(TEST_SPEED_SRCS:src_speed/%.cpp=test_speed/%)
 
 INC =		$(wildcard include/*)
@@ -36,9 +34,9 @@ vect: $(filter test/vect/%, $(TESTS))
 stack: $(filter test/stack/%, $(TESTS))
 reverse: $(filter test/reverse_iterator/%, $(TESTS))
 
-speed:
-	@echo $(TEST_SPEED_SRCS)
-	@echo $(TESTS_SPEED)
+speed: $(TESTS_SPEED)
+speedv: $(filter test_speed/vect/%, $(TESTS_SPEED))
+speedm: $(filter test_speed/map/%, $(TESTS_SPEED))
 
 echo:
 	@echo $(TESTS)
@@ -53,7 +51,7 @@ $(SUBDIRS_TEST):
 	@mkdir -p $(SUBDIRS_TEST)
 
 $(SUBDIRS_TEST_SPEED):
-	@mkdir -p $(SUBDIRS_TEST_SPEED)
+	mkdir -p $(SUBDIRS_TEST_SPEED)
 
 $(OBJS): $(INC) | $(SUBDIRS_OBJ)
 $(BINS):        | $(SUBDIRS_BIN)
@@ -81,9 +79,9 @@ test_rule/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
 	@bash test.sh $@ $^
 
 test_speed/%: src_speed/main.cpp src_speed/%.cpp | $(SUBDIRS_TEST_SPEED)
-	@clang++ $^ -o $@_mine -Wall -Wextra -Werror -std=c++98 -Iinclude -D MINE
-	@clang++ $^ -o $@_std -Wall -Wextra -Werror -std=c++98 -Iinclude
-	@bash test_speed.sh $@
+	clang++ $^ -o $@_mine -Wall -Wextra -Werror -std=c++98 -Iinclude -D MINE
+	clang++ $^ -o $@_std -Wall -Wextra -Werror -std=c++98 -Iinclude
+	bash test_speed.sh $@
 
 clean:
 	rm -rf obj/
@@ -92,6 +90,7 @@ fclean:
 	rm -rf bin/
 	rm -rf obj/
 	rm -rf test/
+	rm -rf test_speed/
 
 re: fclean all
 
