@@ -281,22 +281,27 @@ class vector {
   //Erase elements (public member function )
   iterator erase(iterator position) {
     erase(position, position + 1);
+    // pointer p = &(*position);
+    // size_type len = static_cast<size_type>(end() - position) - 1;
+    // std::memmove(p, p + 1, len);
     return position;
   }
 
   iterator erase(iterator first, iterator last) {
-    if (first >= begin() && first < last && last < end())
+    // if (first >= begin() && first < last && last < end())
+    // {
+    iterator it_begin = begin();
+    iterator it_end = end();
+    iterator first_mov = first;
+    iterator last_mov = last;
+    while (last_mov != it_end)
     {
-      iterator first_mov = first;
-      iterator last_mov = last;
-      while (last_mov != end())
-      {
-        *first_mov = *last_mov;
-        ++first_mov;
-        ++last_mov;
-      }
-      _destroy_from(first_mov - begin());
+      *first_mov = *last_mov;
+      ++first_mov;
+      ++last_mov;
     }
+    _destroy_from(first_mov - it_begin);
+    // }
     return first;
   }
 

@@ -340,11 +340,11 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
   BST(const key_compare &kComp = key_compare(),
       allocator_type const &vAlloc = value_allocator_type())
       : _root(NULL), _key_comp(kComp), _value_comp(kComp), _value_alloc(vAlloc),
-        _node_alloc(vAlloc), _a_node_was_removed(false) {}
+        _node_alloc(vAlloc), _a_node_was_removed(false), _size(0) {}
 
   BST(BST const &x)
       : _root(NULL), _key_comp(x._key_comp), _value_comp(x._key_comp), _value_alloc(x._value_alloc),
-        _node_alloc(x._value_alloc), _a_node_was_removed(x._a_node_was_removed) {
+        _node_alloc(x._value_alloc), _a_node_was_removed(x._a_node_was_removed), _size(x._size) {
     _root = Node::deepcopy(x._root, NULL);
   }
 
@@ -364,7 +364,8 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
   // CAPACITY
 
   size_t get_size() const {
-    return Node::get_size(_root);
+    return _size;
+    // return Node::get_size(_root);
   }
 
   bool empty() {
@@ -467,6 +468,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
   Node *new_node(value_type const &val) {
     Node *n = _node_alloc.allocate(1);
     _node_alloc.construct(n, val, *this);
+    _size++;
     return n;
   }
 
@@ -475,6 +477,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
       return;
     _node_alloc.destroy(n);
     _node_alloc.deallocate(n, 1);
+    _size--;
   }
 
   Node                 *_root;
@@ -483,6 +486,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
   value_allocator_type _value_alloc;
   node_allocator_type  _node_alloc;
   bool                 _a_node_was_removed;
+  size_t               _size;
 };
 
 template <class KeyType,

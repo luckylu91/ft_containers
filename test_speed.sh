@@ -2,6 +2,9 @@
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
+CYAN='\033[1;36m'
+BOLD='\033[1m'
+UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 ERASE='\033[2K'
 
@@ -16,15 +19,18 @@ EXEC_STD="$1""_std"
 
 # mkdir -p $TEST_PATH
 
-echo -n "Speed test $TEST_NAME (mine)... "
-$EXEC_MINE 0 1> $TEST_STDOUT_MINE 2> $TEST_STDERR_MINE
-cat $TEST_STDOUT_MINE
 echo
+echo -e "$BOLD""$UNDERLINE""$CYAN""$TEST_NAME""$NC"": "
 
-echo -n "Speed test $TEST_NAME (std)... "
-$EXEC_STD 0 1> $TEST_STDOUT_STD  2> $TEST_STDERR_STD
-cat $TEST_STDOUT_STD
-echo
+echo -en "$RED""Mine""$NC""... "
+$EXEC_MINE 1> $TEST_STDOUT_MINE 2> $TEST_STDERR_MINE
+echo $(cat $TEST_STDOUT_MINE)
 
-echo -n "The ratio is (mine) / (std) is : "
+echo -en "$RED""STD""$NC"".... "
+$EXEC_STD 1> $TEST_STDOUT_STD  2> $TEST_STDERR_STD
+echo $(cat $TEST_STDOUT_STD)
+
+echo -n "Ratio (Mine) / (STD) : "
+echo -en "$GREEN"
 echo "scale=3; $(cat $TEST_STDOUT_MINE) / $(cat $TEST_STDOUT_STD)" | bc
+echo -e "$NC"

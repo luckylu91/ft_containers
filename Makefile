@@ -80,8 +80,10 @@ test_rule/%: bin/%_mine bin/%_std | $(SUBDIRS_TEST)
 
 test_speed/%: src_speed/main.cpp src_speed/%.cpp | $(SUBDIRS_TEST_SPEED)
 	clang++ $^ -o $@_mine -Wall -Wextra -Werror -std=c++98 -Iinclude -D MINE
+	@echo -en "$(erase)"
 	clang++ $^ -o $@_std -Wall -Wextra -Werror -std=c++98 -Iinclude
-	bash test_speed.sh $@
+	@echo -en "$(erase)"
+	@bash test_speed.sh $@
 
 clean:
 	rm -rf obj/
