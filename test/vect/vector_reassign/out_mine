@@ -14,10 +14,8 @@ Copy Constructor (3)
 Destructor (3)
 A(0), A(1), A(2), A(3)
 --- erasing the 2 first elements ---
-Assign Operator (0 becomes 2)
-Assign Operator (1 becomes 3)
-Destructor (3)
-Destructor (2)
+Destructor (1)
+Destructor (0)
 A(2), A(3)
 --- reserving 25 ---
 Copy Constructor (3)

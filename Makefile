@@ -5,7 +5,7 @@ cup="\\033[1A"
 erase="\\033[1A\\033[2K"
 
 CC =clang++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -Iinclude #-g3 -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -Iinclude -g3 -fsanitize=address
 SHELL = /bin/bash
 
 SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)

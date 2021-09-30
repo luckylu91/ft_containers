@@ -281,26 +281,52 @@ class vector {
   //Erase elements (public member function )
   iterator erase(iterator position) {
     erase(position, position + 1);
+
+    // iterator it_end = end();
+    // iterator first_mov = first;
+    // iterator last_mov = last;
+    // while (last_mov != it_end)
+    // {
+    //   // *(first_mov++) = *(last_mov++);
+    //   *first_mov = *last_mov;
+    //   ++first_mov;
+    //   ++last_mov;
+    // }
+    // _destroy_from(first_mov - begin());
+
     // pointer p = &(*position);
-    // size_type len = static_cast<size_type>(end() - position) - 1;
-    // std::memmove(p, p + 1, len);
+    // size_type len = static_cast<size_t>(end() - position) - 1;
+    // _destroy_at(p - begin());
+    // std::memmove(p, p + 1, len * sizeof(value_type));
+
+    // size_type start = static_cast<size_type>(&(*position) - begin());
+    // for (size_type i = start; i < _size - 1; ++i) {
+    //   _array[i] = _array[i + 1];
+    // }
+    // _destroy_at(_size - 1);
     return position;
   }
 
   iterator erase(iterator first, iterator last) {
     // if (first >= begin() && first < last && last < end())
     // {
-    iterator it_begin = begin();
-    iterator it_end = end();
-    iterator first_mov = first;
-    iterator last_mov = last;
-    while (last_mov != it_end)
-    {
-      *first_mov = *last_mov;
-      ++first_mov;
-      ++last_mov;
-    }
-    _destroy_from(first_mov - it_begin);
+    // iterator it_end = end();
+    // iterator first_mov = first;
+    // iterator last_mov = last;
+    // while (last_mov != it_end)
+    // {
+    //   // *(first_mov++) = *(last_mov++);
+    //   *first_mov = *last_mov;
+    //   ++first_mov;
+    //   ++last_mov;
+    // }
+    // _destroy_from(first_mov - begin());
+    pointer pfirst = &(*first);
+    pointer plast = &(*last);
+    size_type len = static_cast<size_t>(end() - last);
+    _destroy_range(pfirst, plast);
+    if (len > 0)
+      std::memmove(pfirst, plast, len * sizeof(value_type));
     // }
     return first;
   }
@@ -420,6 +446,14 @@ class vector {
   void _destroy_at(size_type i) {
     _allocator.destroy(_array + i);
     _size--;
+  }
+
+  void _destroy_range(pointer first, pointer last) {
+    size_type delta_size = static_cast<size_type>(last - first);
+    while (last-- != first) {
+      _allocator.destroy(last);
+    }
+    _size -= delta_size;
   }
 
   void _destroy_from(size_type start) {

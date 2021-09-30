@@ -1,0 +1,5 @@
+2021-09-30 15:40:58.569 leaks[24231:81579] *** Symbolication: analysis tool cannot dlopen /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib, so cannot introspect target process's malloc zone named asan_0x10a307880.
+
+2021-09-30 15:40:58.569 leaks[24231:81579] *** Symbolication:  no introspect structure for malloc zone asan_0x10a307880
+2021-09-30 15:40:58.731 leaks[24231:81579] *** Symbolication:  no introspect structure for malloc zone asan_0x10a307880
+leaks[24231]: [fatal] unable to instantiate a memory scanner.

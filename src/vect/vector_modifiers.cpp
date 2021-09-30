@@ -63,9 +63,19 @@ void test_with(T (&array10)[10], T (&array7)[7]) {
   print_container_nl(vect);
 
   // erase, clear
-  vect.erase(vect.begin() + 2);
   vect.clear();
 }
+
+template <typename T>
+void test_erase(T (&array10)[10]) {
+  vector<T> vect(array10, array_end(array10));
+
+  vect.erase(vect.begin() + 2);
+  print_container_nl(vect);
+  vect.erase(vect.begin() + 1, vect.begin() + 4);
+  print_container_nl(vect);
+}
+
 
 template <typename T>
 void test_assign(T (&array10)[10]) {
@@ -102,7 +112,6 @@ void test_swap(T (&array10)[10], T (&array7)[7]) {
   print_container_nl(vect10);
   print_container_nl(vect7);
 }
-
 
 void test() {
   std::cout << "Test on vector<int>" << std::endl;
