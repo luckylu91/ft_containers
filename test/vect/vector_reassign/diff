@@ -1,8 +1,0 @@
-17,18c17,20
-< Destructor (1)
-< Destructor (0)
----
-> Assign Operator (0 becomes 2)
-> Assign Operator (1 becomes 3)
-> Destructor (3)
-> Destructor (2)

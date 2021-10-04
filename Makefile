@@ -5,7 +5,7 @@ cup="\\033[1A"
 erase="\\033[1A\\033[2K"
 
 CC =clang++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -Iinclude -g3 -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -Iinclude #-g3 -fsanitize=address
 SHELL = /bin/bash
 
 SUBDIRS = $(shell find src -mindepth 1 -type d | grep -v ".dSYM" | cut -d/ -f2-)
@@ -28,7 +28,13 @@ INC =		$(wildcard include/*)
 
 .PRECIOUS: bin/%
 
-all:	$(TESTS_RULES)
+all: fclean
+	@echo "--- Tests ---"
+	@make tests
+	@echo "--- Speed ---"
+	@make speed
+
+tests:	$(TESTS_RULES)
 map:	$(filter test/map/%, $(TESTS))
 vect: $(filter test/vect/%, $(TESTS))
 stack: $(filter test/stack/%, $(TESTS))
@@ -89,10 +95,11 @@ clean:
 	rm -rf obj/
 
 fclean:
-	rm -rf bin/
-	rm -rf obj/
-	rm -rf test/
-	rm -rf test_speed/
+	@echo "--- Cleaning ---"
+	@rm -rf bin/
+	@rm -rf obj/
+	@rm -rf test/
+	@rm -rf test_speed/
 
 re: fclean all
 

@@ -1,13 +1,8 @@
 #pragma once
 #include <functional>
 #include <memory>
-// #include <cmath>
 #include <algorithm>  // max
-
 #include "pair.hpp"
-// //
-// #include <iostream>
-// #include <iomanip>
 
 namespace ft {
 

@@ -31,27 +31,12 @@ class A {
 
 int A::_ccpt = 0;
 
-// void test2() {
-//   vector<A> vect(10);
-// }
 
 void test()
 {
   // test2();
   vector<A> vect;
 
-  std::cout << "--- reserving 5 ---" << std::endl;
-  vect.reserve(5);
-
-  std::cout << "--- push_back x 4 ---" << std::endl;
-  vect.push_back(A());
-  vect.push_back(A());
-  vect.push_back(A());
-  vect.push_back(A());
-  print_container_nl(vect);
-  std::cout << "--- erasing the 2 first elements ---" << std::endl;
-  vect.erase(vect.begin(), vect.begin() + 2);
-  print_container_nl(vect);
   std::cout << "--- reserving 25 ---" << std::endl;
   vect.reserve(25);
   std::cout << "--- push_back x 20 ---" << std::endl;

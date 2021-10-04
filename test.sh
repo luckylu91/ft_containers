@@ -28,12 +28,12 @@ else
   echo -e "[$GREEN""OK""$NC""]"
 fi
 
-leaks -atExit -- $2 1>/dev/null 2> $TEST_LEAKS_MINE
+leaks -atExit -- $2 > $TEST_LEAKS_MINE
 if [[ $? -ne 0 ]]; then
   echo -e "    -> ""$RED""LEAKS""$NC"
 fi
 
-leaks -atExit -- $3 1>/dev/null 2> $TEST_LEAKS_STD
+leaks -atExit -- $3 > $TEST_LEAKS_STD
 if [[ $? -ne 0 ]]; then
   echo -e "    -> ""$RED""LEAKS_STD""$NC"
 fi

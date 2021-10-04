@@ -281,53 +281,16 @@ class vector {
   //Erase elements (public member function )
   iterator erase(iterator position) {
     erase(position, position + 1);
-
-    // iterator it_end = end();
-    // iterator first_mov = first;
-    // iterator last_mov = last;
-    // while (last_mov != it_end)
-    // {
-    //   // *(first_mov++) = *(last_mov++);
-    //   *first_mov = *last_mov;
-    //   ++first_mov;
-    //   ++last_mov;
-    // }
-    // _destroy_from(first_mov - begin());
-
-    // pointer p = &(*position);
-    // size_type len = static_cast<size_t>(end() - position) - 1;
-    // _destroy_at(p - begin());
-    // std::memmove(p, p + 1, len * sizeof(value_type));
-
-    // size_type start = static_cast<size_type>(&(*position) - begin());
-    // for (size_type i = start; i < _size - 1; ++i) {
-    //   _array[i] = _array[i + 1];
-    // }
-    // _destroy_at(_size - 1);
     return position;
   }
 
   iterator erase(iterator first, iterator last) {
-    // if (first >= begin() && first < last && last < end())
-    // {
-    // iterator it_end = end();
-    // iterator first_mov = first;
-    // iterator last_mov = last;
-    // while (last_mov != it_end)
-    // {
-    //   // *(first_mov++) = *(last_mov++);
-    //   *first_mov = *last_mov;
-    //   ++first_mov;
-    //   ++last_mov;
-    // }
-    // _destroy_from(first_mov - begin());
     pointer pfirst = &(*first);
     pointer plast = &(*last);
     size_type len = static_cast<size_t>(end() - last);
     _destroy_range(pfirst, plast);
     if (len > 0)
       std::memmove(pfirst, plast, len * sizeof(value_type));
-    // }
     return first;
   }
 
@@ -404,7 +367,6 @@ class vector {
   void _allocate(size_type new_capacity) {
     _array = _allocator.allocate(new_capacity);
     _capacity = new_capacity;
-    // _size = 0;
   }
 
   template <class InputIterator>
@@ -418,24 +380,6 @@ class vector {
       _allocator.construct(_array + start + i, val);
     _size += n;
   }
-
-  // void _construct_range(_range const & dst, _range const & src, size_type max) {
-  //   size_type cpt = 0;
-  //   size_type j = src.start;
-  //   for (size_type i = dst.start; i != dst.stop && cpt < max; i += dst.increment) {
-  //     _allocator.construct(_array + i, _array + j);
-  //     j += src.increment;
-  //     cpt++;
-  //   }
-  // }
-
-  // void _copy_range(_range const & dst, _range const & src) {
-  //   size_type j = src.start;
-  //   for (size_type i = dst.start; i != dst.stop ; i += dst.increment) {
-  //     *(_array + i) = *(_array + j);
-  //     j += src.increment;
-  //   }
-  // }
 
   void _assign_range(_range const & dst, value_type const & val) {
     for (size_type i = dst.start; i != dst.stop ; i += dst.increment) {
@@ -482,14 +426,12 @@ class vector {
   void _enlarge(size_type new_capacity) {
     pointer new_area = _allocator.allocate(new_capacity);
     pointer old_area = _array;
-    if (_size > 0) {
+    for (size_type i = _size; i > 0; i--)
+      _allocator.construct(new_area + i - 1, old_area[i - 1]);
+    if (old_area != NULL) {
       for (size_type i = _size; i > 0; i--)
-        _allocator.construct(new_area + i - 1, old_area[i - 1]);
-      if (old_area != NULL) {
-        for (size_type i = _size; i > 0; i--)
-          _allocator.destroy(old_area + i - 1);
-        _allocator.deallocate(old_area, _capacity);
-      }
+        _allocator.destroy(old_area + i - 1);
+      _allocator.deallocate(old_area, _capacity);
     }
     _array = new_area;
     _capacity = new_capacity;
