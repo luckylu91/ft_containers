@@ -1,0 +1,56 @@
+--- Test size ---
+Map size = 1
+Actual size = 1
+Map size = 2
+Actual size = 2
+Map size = 3
+Actual size = 3
+Map size = 4
+Actual size = 4
+Map size = 5
+Actual size = 5
+Map size = 6
+Actual size = 6
+Map size = 7
+Actual size = 7
+Map size = 8
+Actual size = 8
+Map size = 9
+Actual size = 9
+Map size = 10
+Actual size = 10
+Map size = 9
+Actual size = 9
+Map size = 8
+Actual size = 8
+Map size = 7
+Actual size = 7
+Map size = 6
+Actual size = 6
+Map size = 5
+Actual size = 5
+Map size = 0
+Actual size = 0
+Process:         map_size_std [24656]
+Path:            /Volumes/VOLUME/*/map_size_std
+Load Address:    0x107e20000
+Identifier:      map_size_std
+Version:         ???
+Code Type:       X86-64
+Parent Process:  leaks [24655]
+
+Date/Time:       2021-10-05 15:14:54.774 +0200
+Launch Time:     2021-10-05 15:14:54.599 +0200
+OS Version:      Mac OS X 10.14.6 (18G103)
+Report Version:  7
+Analysis Tool:   /Applications/Xcode.app/Contents/Developer/usr/bin/leaks
+Analysis Tool Version:  Xcode 11.3.1 (11C505)
+
+Physical footprint:         324K
+Physical footprint (peak):  324K
+----
+
+leaks Report Version: 4.0
+Process 24656: 163 nodes malloced for 18 KB
+Process 24656: 0 leaks for 0 total leaked bytes.
+

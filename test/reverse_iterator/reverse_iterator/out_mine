@@ -1,0 +1,32 @@
+9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+rit_3 = 6
+rit_3 - 2 = 8
+rit_3-- = 6
+rit_3++ = 7
+--rit_3 = 7
+++rit_3 = 6
+rit_3 -= 28
+rit_3 += 26
+rit_3[2] = 4
+rit_3[2] <- 10
+rit_3[2] = 10
+(rit_begin + 3 == rit_begin + 3) : true
+(rit_begin + 3 == rit_begin + 4) : false
+(rit_begin + 3 != rit_begin + 3) : false
+(rit_begin + 3 != rit_begin + 4) : true
+(rit_begin + 3 < rit_begin + 3) : false
+(rit_begin + 3 < rit_begin + 4) : true
+(rit_begin + 4 < rit_begin + 3) : true
+(rit_begin + 3 > rit_begin + 3) : false
+(rit_begin + 3 > rit_begin + 4) : false
+(rit_begin + 4 > rit_begin + 3) : false
+(rit_begin + 3 <= rit_begin + 3) : true
+(rit_begin + 3 <= rit_begin + 4) : true
+(rit_begin + 4 <= rit_begin + 3) : true
+(rit_begin + 3 >= rit_begin + 3) : true
+(rit_begin + 3 >= rit_begin + 4) : false
+(rit_begin + 4 >= rit_begin + 3) : false
+
+rit_end - rit_begin : 10
+
+9, 8, 7, 6, 5, 4, 3, 2, 1, 0

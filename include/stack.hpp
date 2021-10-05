@@ -11,9 +11,6 @@ struct stack {
   typedef Container container_type;
   typedef size_t    size_type;
 
-  // Member objects
-
-  container_type c;
 
 
   // Member functions
@@ -42,6 +39,10 @@ struct stack {
   friend bool operator<= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c <= rhs.c; }
   friend bool operator>  (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c > rhs.c; }
   friend bool operator>= (const stack<T,Container>& lhs, const stack<T,Container>& rhs) { return lhs.c >= rhs.c; }
+
+  // Member objects
+ protected:
+  container_type c;
 };
 
 } // namespace ft

@@ -1,0 +1,38 @@
+1 is in m : true
+(0,0), (1,666), (2,2), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+12 is in m : false
+(0,0), (1,666), (2,2), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+Number of times 1 is present in m : 1
+Number of times 12 is present in m : 0
+(0,0), (1,1), (2,2), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+lower_bound of 2 in m : (2,2), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+lower_bound of 3 in m : (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+lower_bound of 4 in m : (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+upper_bound of 2 in m : (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+upper_bound of 3 in m : (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
+upper_bound of 4 in m : (5,5), (6,6), (7,7), (8,8), (9,9)
+equal_range of 2 in m : (2,2)
+equal_range of 3 in m : 
+Process:         map_operations_std [24604]
+Path:            /Volumes/VOLUME/*/map_operations_std
+Load Address:    0x10b279000
+Identifier:      map_operations_std
+Version:         ???
+Code Type:       X86-64
+Parent Process:  leaks [24603]
+
+Date/Time:       2021-10-05 15:14:53.533 +0200
+Launch Time:     2021-10-05 15:14:53.365 +0200
+OS Version:      Mac OS X 10.14.6 (18G103)
+Report Version:  7
+Analysis Tool:   /Applications/Xcode.app/Contents/Developer/usr/bin/leaks
+Analysis Tool Version:  Xcode 11.3.1 (11C505)
+
+Physical footprint:         348K
+Physical footprint (peak):  348K
+----
+
+leaks Report Version: 4.0
+Process 24604: 163 nodes malloced for 18 KB
+Process 24604: 0 leaks for 0 total leaked bytes.
+

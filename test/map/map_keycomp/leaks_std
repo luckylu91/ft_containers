@@ -1,0 +1,103 @@
+Inserting (0,0)
+Was present : 1
+Iterator points to (0,0)
+Inserting (1,1)
+Was present : 0
+Iterator points to (0,0)
+Inserting (2,2)
+Was present : 1
+Iterator points to (2,2)
+Inserting (3,3)
+Was present : 0
+Iterator points to (2,2)
+Inserting (4,4)
+Was present : 1
+Iterator points to (4,4)
+Inserting (5,5)
+Was present : 0
+Iterator points to (4,4)
+Inserting (6,6)
+Was present : 1
+Iterator points to (6,6)
+Inserting (7,7)
+Was present : 0
+Iterator points to (6,6)
+Inserting (8,8)
+Was present : 1
+Iterator points to (8,8)
+Inserting (9,9)
+Was present : 0
+Iterator points to (8,8)
+Inserting (10,10)
+Was present : 1
+Iterator points to (10,10)
+Inserting (11,11)
+Was present : 0
+Iterator points to (10,10)
+Inserting (12,12)
+Was present : 1
+Iterator points to (12,12)
+Inserting (13,13)
+Was present : 0
+Iterator points to (12,12)
+Inserting (14,14)
+Was present : 1
+Iterator points to (14,14)
+Inserting (15,15)
+Was present : 0
+Iterator points to (14,14)
+Inserting (16,16)
+Was present : 1
+Iterator points to (16,16)
+Inserting (17,17)
+Was present : 0
+Iterator points to (16,16)
+Inserting (18,18)
+Was present : 1
+Iterator points to (18,18)
+Inserting (19,19)
+Was present : 0
+Iterator points to (18,18)
+0
+0
+2
+2
+4
+4
+6
+6
+8
+8
+10
+10
+12
+12
+14
+14
+16
+16
+18
+18
+Process:         map_keycomp_std [24497]
+Path:            /Volumes/VOLUME/*/map_keycomp_std
+Load Address:    0x106bb6000
+Identifier:      map_keycomp_std
+Version:         ???
+Code Type:       X86-64
+Parent Process:  leaks [24496]
+
+Date/Time:       2021-10-05 15:14:50.980 +0200
+Launch Time:     2021-10-05 15:14:50.814 +0200
+OS Version:      Mac OS X 10.14.6 (18G103)
+Report Version:  7
+Analysis Tool:   /Applications/Xcode.app/Contents/Developer/usr/bin/leaks
+Analysis Tool Version:  Xcode 11.3.1 (11C505)
+
+Physical footprint:         324K
+Physical footprint (peak):  324K
+----
+
+leaks Report Version: 4.0
+Process 24497: 163 nodes malloced for 18 KB
+Process 24497: 0 leaks for 0 total leaked bytes.
+

@@ -166,6 +166,23 @@ class vector {
     return *this;
   }
 
+
+    // Iterators
+
+  //Return iterator to beginning
+  iterator begin()                      { return iterator(_array); }
+  const_iterator begin() const          { return const_iterator(_array); }
+  //Return iterator to end
+  iterator end()                        { return _array != NULL ? iterator(_array + _size) : iterator(); }
+  const_iterator end() const            { return _array != NULL ? const_iterator(_array + _size) : const_iterator(); }
+  //Return reverse iterator to reverse beginning
+  reverse_iterator rbegin()             { return _array != NULL ? reverse_iterator(_array + _size) : reverse_iterator(); }
+  //Return reverse iterator to reverse end
+  const_reverse_iterator rbegin() const { return _array != NULL ? const_reverse_iterator(_array + _size) : const_reverse_iterator(); }
+  reverse_iterator rend()               { return reverse_iterator(_array); }
+  const_reverse_iterator rend() const   { return const_reverse_iterator(_array); }
+
+
   // CAPACITY
 
   //Return size (public member function )
@@ -335,23 +352,6 @@ class vector {
   friend bool operator<= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
     { return !(lhs > rhs); }
 
-
-
-  // Iterators
-
-  //Return iterator to beginning
-  iterator begin()                      { return iterator(_array); }
-  const_iterator begin() const          { return const_iterator(_array); }
-  //Return iterator to end
-  iterator end()                        { return _array != NULL ? iterator(_array + _size) : iterator(); }
-  const_iterator end() const            { return _array != NULL ? const_iterator(_array + _size) : const_iterator(); }
-  //Return reverse iterator to reverse beginning
-  reverse_iterator rbegin()             { return _array != NULL ? reverse_iterator(_array + _size) : reverse_iterator(); }
-  //Return reverse iterator to reverse end
-  const_reverse_iterator rbegin() const { return _array != NULL ? const_reverse_iterator(_array + _size) : const_reverse_iterator(); }
-  reverse_iterator rend()               { return reverse_iterator(_array); }
-  const_reverse_iterator rend() const   { return const_reverse_iterator(_array); }
-
   //Exchange contents of vectors
   friend void swap(vector &x, vector &y) {
     x.swap(y);
@@ -469,15 +469,15 @@ class vector {
   }
 
  public:
-  template <class IteratorType>
+  template <class IT>
   class Iterator {
    public:
     typedef std::random_access_iterator_tag iterator_category;
     typedef std::ptrdiff_t                  difference_type;
-    typedef IteratorType                    value_type;
-    typedef ValueAlloc                           allocator_type;
-    typedef IteratorType*                   pointer;
-    typedef IteratorType&                   reference;
+    typedef IT                              value_type;
+    typedef ValueAlloc                      allocator_type;
+    typedef IT*                             pointer;
+    typedef IT&                             reference;
 
     Iterator(pointer ptr = 0) : _ptr(ptr) {}
     Iterator(Iterator const &x) : _ptr(x._ptr) {}
@@ -517,16 +517,23 @@ class vector {
       return *this;
     }
 
-    friend difference_type operator-(Iterator const &a, Iterator const &b) { return a._ptr - b._ptr; };
-    friend Iterator operator+(Iterator const &a, difference_type delta) { return Iterator(a._ptr + delta); };
-    friend Iterator operator+(difference_type delta, Iterator const &a) { return Iterator(a._ptr + delta); };
-    friend Iterator operator-(Iterator const &a, difference_type delta) { return Iterator(a._ptr - delta); };
-    friend bool operator==(Iterator const &a, Iterator const &b) { return a._ptr == b._ptr; };
-    friend bool operator!=(Iterator const &a, Iterator const &b) { return a._ptr != b._ptr; };
-    friend bool operator<(Iterator const &a, Iterator const &b) { return a._ptr < b._ptr; };
-    friend bool operator>(Iterator const &a, Iterator const &b) { return a._ptr > b._ptr; };
-    friend bool operator<=(Iterator const &a, Iterator const &b) { return a._ptr <= b._ptr; };
-    friend bool operator>=(Iterator const &a, Iterator const &b) { return a._ptr >= b._ptr; };
+    friend Iterator operator+(Iterator const &a, difference_type delta) { return Iterator(a._ptr + delta); }
+    friend Iterator operator+(difference_type delta, Iterator const &a) { return Iterator(a._ptr + delta); }
+    friend Iterator operator-(Iterator const &a, difference_type delta) { return Iterator(a._ptr - delta); }
+    template <class T1, class T2>
+      friend difference_type operator-(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr - b._ptr; }
+    template <class T1, class T2>
+      friend bool operator==(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr == b._ptr; }
+    template <class T1, class T2>
+      friend bool operator!=(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr != b._ptr; }
+    template <class T1, class T2>
+      friend bool operator<(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr < b._ptr; }
+    template <class T1, class T2>
+      friend bool operator>(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr > b._ptr; }
+    template <class T1, class T2>
+      friend bool operator<=(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr <= b._ptr; }
+    template <class T1, class T2>
+      friend bool operator>=(Iterator<T1> const &a, Iterator<T2> const &b) { return a._ptr >= b._ptr; }
 
    private:
     pointer _ptr;

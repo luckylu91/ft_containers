@@ -41,12 +41,26 @@ void test_iterator_methods(InputIterator it) {
   std::cout << "--it = " << *(--it) << ", now *it = " << *it << std::endl;
   // operator--(int)
   std::cout << "it-- = " << *(it--) << ", now *it = " << *it << std::endl;
-  std::boolalpha(std::cout);
   // operator==
   std::cout << "it == it : " << (it == it) << std::endl;
   // operator!=
   std::cout << "it != it : " << (it != it) << std::endl;
-  std::noboolalpha(std::cout);
+}
+
+void test_comparison_iters() {
+  map<int, int> m;
+  for (int i = 0; i < 10; i++)
+    m[i] = i;
+  map<int, int> const & cm = m;
+
+  std::cout << "begin() == (const_iterator)begin() : " << (m.begin() == cm.begin()) << std::endl;
+  std::cout << "(const_iterator)begin() == begin() : " << (cm.begin() == m.begin()) << std::endl;
+  std::cout << "end() == (const_iterator)end() : " << (m.end() == cm.end()) << std::endl;
+  std::cout << "(const_iterator)end() == end() : " << (cm.end() == m.end()) << std::endl;
+  std::cout << "begin() == (const_iterator)end() : " << (m.begin() == cm.end()) << std::endl;
+  std::cout << "(const_iterator)begin() == end() : " << (cm.begin() == m.end()) << std::endl;
+  std::cout << "end() == (const_iterator)begin() : " << (m.end() == cm.begin()) << std::endl;
+  std::cout << "(const_iterator)end() == begin() : " << (cm.end() == m.begin()) << std::endl;
 }
 
 void test() {
@@ -55,6 +69,7 @@ void test() {
   for (int i = 0; i < 15; ++i)
     bst.insert(make_pair(i, i));
 
+  std::boolalpha(std::cout);
   map<int, int> const cbst(bst);
   std::cout << "map::iterator" << std::endl << std::endl;
   test_iterator_methods(bst.begin());
@@ -62,5 +77,9 @@ void test() {
   std::cout << "map::const_iterator" << std::endl << std::endl;
   test_iterator_methods(cbst.begin());
 
+  std::cout << std::endl;
   test_iterator_types();
+
+  std::cout << std::endl;
+  test_comparison_iters();
 }

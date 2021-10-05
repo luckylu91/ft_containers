@@ -70,8 +70,7 @@ class reverse_iterator {
   friend bool operator<= (const reverse_iterator& lhs, const reverse_iterator& rhs) { return lhs._base >= rhs._base; }
   friend bool operator>  (const reverse_iterator& lhs, const reverse_iterator& rhs) { return lhs._base < rhs._base; }
   friend bool operator>= (const reverse_iterator& lhs, const reverse_iterator& rhs) { return lhs._base <= rhs._base; }
-  friend reverse_iterator operator+(difference_type n, const reverse_iterator& rev_it) { return rev_it + n; }
-  friend difference_type operator- (const reverse_iterator& lhs, const reverse_iterator& rhs) { return lhs._base - rhs._base; }
+  friend difference_type operator- (const reverse_iterator& lhs, const reverse_iterator& rhs) { return rhs._base - lhs._base; }
 
  private:
   iterator_type _base;

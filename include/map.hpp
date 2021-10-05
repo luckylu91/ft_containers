@@ -6,6 +6,17 @@
 
 namespace ft {
 
+// TEMPLATE TYPES META-PROGRAMMING
+
+template <class T, class U>
+struct if_const {
+  typedef U type;
+};
+template <class T, class U>
+struct if_const<const T, U> {
+  typedef const U type;
+};
+
 template <class Key,
           class T,
           class KeyCompare = std::less<Key>,
@@ -13,7 +24,7 @@ template <class Key,
 class map {
  public:
   struct value_compare;
-  template <class ValueType, class NodeType> class Iterator;
+  template <class MapType> class Iterator;
 
  private:
   class BST;
@@ -33,8 +44,8 @@ class map {
   typedef typename allocator_type::size_type              size_type;
   typedef BST                                             bst_type;
   typedef typename BST::Node                              bst_node_type;
-  typedef Iterator<value_type, bst_node_type>             iterator;
-  typedef Iterator<const value_type, const bst_node_type> const_iterator;
+  typedef Iterator<map>                                   iterator;
+  typedef Iterator<const map>                             const_iterator;
   typedef std::reverse_iterator<iterator>                 reverse_iterator;
   typedef std::reverse_iterator<const_iterator>           const_reverse_iterator;
 
@@ -99,7 +110,7 @@ class map {
   // Insert elements
   pair<iterator, bool> insert(const value_type &val) {
     pair<bst_node_type *, bool> insertResult = _tree.insert(val);
-    return make_pair(iterator(insertResult.first), insertResult.second);
+    return ft::make_pair(iterator(insertResult.first), insertResult.second);
   }
 
   iterator insert(iterator position, const value_type &val) {
@@ -224,26 +235,26 @@ template <class KeyType,
           class MappedType,
           class KeyCompare,
           class ValueAlloc>
-template  <class ValueType,
-          class NodeType>
+template  <class MapType>
 class map<KeyType, MappedType, KeyCompare, ValueAlloc>::Iterator {
  public:
-  typedef std::bidirectional_iterator_tag iterator_category;
-  typedef std::ptrdiff_t                  difference_type;
-  typedef ValueType                       value_type;
-  typedef ValueAlloc                      allocator_type;
-  typedef ValueType                       *pointer;
-  typedef ValueType                       &reference;
-  typedef NodeType                        node_type;
+  typedef std::bidirectional_iterator_tag                  iterator_category;
+  typedef std::ptrdiff_t                                   difference_type;
+  typedef MapType                                          map_type;
+  typedef typename if_const<map_type, value_type>::type    value_type;
+  typedef value_type                                       *pointer;
+  typedef value_type                                       &reference;
+  typedef typename if_const<map_type, bst_type>::type      bst_type;
+  typedef typename if_const<map_type, bst_node_type>::type node_type;
 
   Iterator() : _tree_ptr(NULL), _current_node(NULL), _is_end(true) {}
 
-  Iterator(map const &map, bool isEnd) : _tree_ptr(&map._tree), _is_end(isEnd) {
-    if (_tree_ptr->_root == NULL || isEnd) {
+  Iterator(map_type &map, bool isEnd) : _tree_ptr(&map._tree), _is_end(isEnd) {
+    if (_tree_ptr->root() == NULL || isEnd) {
       _is_end = true;
       _current_node = NULL;
     } else
-      _current_node = _tree_ptr->_root->leftmost_child();
+      _current_node = _tree_ptr->root()->leftmost_child();
   }
 
   Iterator(node_type *node)
@@ -282,7 +293,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::Iterator {
   Iterator &operator--() {
     if (_is_end) {
       _is_end = false;
-      _current_node = _tree_ptr->_root->rightmost_child();
+      _current_node = _tree_ptr->root()->rightmost_child();
     } else
       _current_node = _current_node->previous();
     return *this;
@@ -293,7 +304,8 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::Iterator {
     return old_value;
   }
 
-  friend bool operator==(Iterator const &a, Iterator const &b) {
+  template <class T1, class T2>
+    friend bool operator==(Iterator<T1> const &a, Iterator<T2> const &b) {
     if ((a._tree_ptr == NULL && b._is_end) || (a._is_end && b._tree_ptr == NULL))
       return true;
     if (a._is_end && b._is_end)
@@ -302,12 +314,13 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::Iterator {
       return false;
     return a._current_node == b._current_node;
   }
-  friend bool operator!=(Iterator const &a, Iterator const &b) {
+  template <class T1, class T2>
+    friend bool operator!=(Iterator<T1> const &a, Iterator<T2> const &b) {
     return !(a == b);
   }
 
  private:
-  bst_type const *_tree_ptr;
+  bst_type       *_tree_ptr;
   node_type      *_current_node;
   bool           _is_end;
 };
@@ -327,8 +340,6 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
   typedef typename map::value_compare value_compare;
   typedef ValueAlloc value_allocator_type;
   typedef typename ValueAlloc::template rebind<Node>::other node_allocator_type;
-
-  friend class map;
 
   // Constructors
 
@@ -374,7 +385,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
     _root = Node::insert(_root, new_val, *this);
     Node *lastAdded = _root->get_last_added();
     bool oneWasAdded = _root->get_one_was_added();
-    return make_pair<Node *, bool>(lastAdded, oneWasAdded);
+    return ft::make_pair<Node *, bool>(lastAdded, oneWasAdded);
   }
 
   size_type remove(key_type const &kVal) {
@@ -408,7 +419,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
     if (n != NULL)
       return n->_value->second;
     else {
-      this->insert(make_pair(kVal, mapped_type()));
+      this->insert(ft::make_pair(kVal, mapped_type()));
       return _root->get_last_added()->_value->second;
     }
   }
@@ -424,24 +435,26 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
   pair<Node const *, Node const *> equal_range(key_type const &k) const {
     Node const *n = this->lower_bound(k);
     if (n->get_value()->first == k)
-      return make_pair(n, n->next());
+      return ft::make_pair(n, n->next());
     else
-      return make_pair(n, n);
+      return ft::make_pair(n, n);
   }
   pair<Node *, Node *> equal_range(key_type const &k) {
     pair<Node const *, Node const *> equal_range_const = \
       const_cast<BST const *>(this)->equal_range(k);
-    return make_pair(const_cast<Node *>(equal_range_const.first),
+    return ft::make_pair(const_cast<Node *>(equal_range_const.first),
                      const_cast<Node *>(equal_range_const.second));
   }
 
   friend bool operator==(BST const &a, BST const &b) { return a._root == b._root; }
   friend bool operator!=(BST const &a, BST const &b) { return a._root != b._root; }
 
-  value_allocator_type get_value_allocator() const { return _value_alloc; };
-  node_allocator_type get_node_allocator() const { return _node_alloc; };
-  value_compare get_key_comparator() const { return _key_comp; };
-  value_compare get_value_comparator() const { return _value_comp; };
+  value_allocator_type get_value_allocator() const { return _value_alloc; }
+  node_allocator_type get_node_allocator() const { return _node_alloc; }
+  value_compare get_key_comparator() const { return _key_comp; }
+  value_compare get_value_comparator() const { return _value_comp; }
+  Node *root() { return _root; }
+  Node const *root() const { return _root; }
 
  private:
 

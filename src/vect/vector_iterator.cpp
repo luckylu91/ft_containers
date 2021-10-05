@@ -55,7 +55,6 @@ void test_iterator_methods(InputIterator it) {
   // operator-
   std::cout << "*(it - (it + 2)) = " << (it - (it + 2)) << std::endl;
   std::cout << "*(it - (it - 1)) = " << (it - (it - 1)) << std::endl;
-  std::boolalpha(std::cout);
   // operator==
   std::cout << "it == it : " << (it == it) << std::endl;
   std::cout << "it == (it + 1) : " << (it == (it + 1)) << std::endl;
@@ -74,12 +73,25 @@ void test_iterator_methods(InputIterator it) {
   // operator>=
   std::cout << "it >= it : " << (it >= it) << std::endl;
   std::cout << "it >= (it - 1) : " << (it >= (it - 1)) << std::endl;
-  std::noboolalpha(std::cout);
+  std::cout << "(it + 3) - it = " << (it + 3) - it << std::endl;
 }
 
-template <class InputIterator>
-void test_compl_iterator(InputIterator it) {
-  std::cout << "(it + 3) - it = " << (it + 3) - it << std::endl;
+void test_comparison_iters() {
+  vector<int> intVect;
+  for (int i = 0; i < 10; i++)
+    intVect.push_back(i);
+  vector<int> const & cIntVect = intVect;
+
+  std::cout << "begin() == (const_iterator)begin() : " << (intVect.begin() == cIntVect.begin()) << std::endl;
+  std::cout << "(const_iterator)begin() == begin() : " << (cIntVect.begin() == intVect.begin()) << std::endl;
+  std::cout << "end() == (const_iterator)end() : " << (intVect.end() == cIntVect.end()) << std::endl;
+  std::cout << "(const_iterator)end() == end() : " << (cIntVect.end() == intVect.end()) << std::endl;
+  std::cout << "begin() == (const_iterator)end() : " << (intVect.begin() == cIntVect.end()) << std::endl;
+  std::cout << "(const_iterator)begin() == end() : " << (cIntVect.begin() == intVect.end()) << std::endl;
+  std::cout << "end() == (const_iterator)begin() : " << (intVect.end() == cIntVect.begin()) << std::endl;
+  std::cout << "(const_iterator)end() == begin() : " << (cIntVect.end() == intVect.begin()) << std::endl;
+  std::cout << "begin() < (const_iterator)end() : " << (intVect.begin() < cIntVect.end()) << std::endl;
+  std::cout << "(const_iterator)begin() < end() : " << (cIntVect.begin() < intVect.end()) << std::endl;
 }
 
 void test() {
@@ -87,14 +99,17 @@ void test() {
   for (int i = 0; i < 10; i++)
     intVect.push_back(i);
   vector<int> const cIntVect(intVect);
+
+  std::boolalpha(std::cout);
   std::cout << "vector::iterator" << std::endl << std::endl;
   test_iterator_methods(intVect.begin());
   std::cout << std::endl;
   std::cout << "vector::const_iterator" << std::endl << std::endl;
   test_iterator_methods(cIntVect.begin());
 
+  std::cout << std::endl;
   test_iterator_types();
 
   std::cout << std::endl;
-  test_compl_iterator(intVect.begin());
+  test_comparison_iters();
 }

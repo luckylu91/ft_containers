@@ -10,6 +10,7 @@ struct A {
 };
 
 void test() {
+  std::boolalpha(std::cout);
 
   {
     typedef std::vector<int>::iterator vect_iterator;
@@ -42,7 +43,6 @@ void test() {
     std::cout << "rit_3[2] <- 10" << std::endl;
     rit_3[2] = 10;
     std::cout << "rit_3[2] = " << rit_3[2] << std::endl;
-    std::boolalpha(std::cout);
     std::cout << "(rit_begin + 3 == rit_begin + 3) : " << (rit_begin + 3 == rit_begin + 3) << std::endl;
     std::cout << "(rit_begin + 3 == rit_begin + 4) : " << (rit_begin + 3 == rit_begin + 4) << std::endl;
     std::cout << "(rit_begin + 3 != rit_begin + 3) : " << (rit_begin + 3 != rit_begin + 3) << std::endl;
@@ -59,6 +59,9 @@ void test() {
     std::cout << "(rit_begin + 3 >= rit_begin + 3) : " << (rit_begin + 3 >= rit_begin + 3) << std::endl;
     std::cout << "(rit_begin + 3 >= rit_begin + 4) : " << (rit_begin + 3 >= rit_begin + 4) << std::endl;
     std::cout << "(rit_begin + 4 >= rit_begin + 3) : " << (rit_begin + 3 >= rit_begin + 4) << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "rit_end - rit_begin : " << (rit_end - rit_begin) << std::endl;
   }
 
   std::cout << std::endl;
