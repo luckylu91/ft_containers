@@ -1,6 +1,8 @@
 #pragma once
 #include <iterator>
 
+namespace ft {
+
 template <class Iterator>
 struct iterator_traits {
   typedef typename Iterator::iterator_category iterator_category;
@@ -27,3 +29,5 @@ struct iterator_traits<T const *> {
   typedef T const *                       pointer;
   typedef T const &                       reference;
 };
+
+} // namespace ft

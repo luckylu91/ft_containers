@@ -114,17 +114,6 @@ class vector {
   typedef typename std::reverse_iterator<iterator>       reverse_iterator;
   typedef typename std::reverse_iterator<const_iterator> const_reverse_iterator;
 
- private:
-
-  struct _range {
-    size_type       start;
-    size_type       stop;
-    difference_type increment;
-
-    _range(size_type start, size_type stop, difference_type increment)
-      : start(start), stop(stop), increment(increment) {}
-  };
-
  public:
 
   // Constructors, Destructor, Assign operation
@@ -335,16 +324,16 @@ class vector {
 
   // RELATIONAL OPERATORS
   friend bool operator== (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
-    { return equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+    { return ft::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
 
   friend bool operator!= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
     { return !(lhs == rhs); }
 
   friend bool operator<  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
-    { return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+    { return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
 
   friend bool operator>  (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
-    { return lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
+    { return ft::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()); }
 
   friend bool operator>= (const vector<T,ValueAlloc>& lhs, const vector<T,ValueAlloc>& rhs)
     { return !(lhs < rhs); }
@@ -363,6 +352,15 @@ class vector {
   size_type  _size;
   size_type  _capacity;
   ValueAlloc _allocator;
+
+  struct _range {
+    size_type       start;
+    size_type       stop;
+    difference_type increment;
+
+    _range(size_type start, size_type stop, difference_type increment)
+      : start(start), stop(stop), increment(increment) {}
+  };
 
   void _allocate(size_type new_capacity) {
     _array = _allocator.allocate(new_capacity);

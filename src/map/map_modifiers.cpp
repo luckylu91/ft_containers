@@ -70,19 +70,15 @@ void test_erase() {
   print_container_nl(m);
   std::cout << "m.erase(2) = " << m.erase(2) << std::endl;
   print_container_nl(m);
-  // (0,0), (1,1), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9)
   m.erase(m.begin());
   m.erase(--(m.end()));
   print_container_nl(m);
-  // (1,1), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8)
   map<int, int>::iterator it[2] = {m.begin(), m.end()};
   it[0]++; it[0]++;
-  // std::cout << *(it[0]) << std::endl;
   it[1]--; it[1]--;
   m.erase(it[0], it[1]);
   print_container_nl(m);
   std::cout << "size = " << m.size() << std::endl;
-  // (1,1), (3,3), (7,7), (8,8)
 }
 
 

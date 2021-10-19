@@ -29,18 +29,7 @@ void test_size()
   std::cout << "Actual size = " << StaticCounter::total << std::endl;
 }
 
-// void test_max_size() {
-//   map<int, int> m1;
-//   std::cout << "(int, int) max size : " << m1.max_size() << std::endl;
-//   map<int, long long int> m2;
-//   std::cout << "(int, long long int) max size : " << m2.max_size() << std::endl;
-//   map<long long int, long long int> m3;
-//   std::cout << "(long long int, long long int) max size : " << m3.max_size() << std::endl;
-// }
-
 void test() {
   std::cout << "--- Test size ---" << std::endl;
   test_size();
-  // std::cout << "--- Test size ---" << std::endl;
-  // test_max_size();
 }

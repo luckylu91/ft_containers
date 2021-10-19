@@ -20,7 +20,7 @@ struct if_const<const T, U> {
 template <class Key,
           class T,
           class KeyCompare = std::less<Key>,
-          class ValueAlloc = std::allocator<pair<const Key, T> > >
+          class ValueAlloc = std::allocator<ft::pair<const Key, T> > >
 class map {
  public:
   struct value_compare;
@@ -33,7 +33,7 @@ class map {
 
   typedef Key                                             key_type;
   typedef T                                               mapped_type;
-  typedef pair<const key_type, mapped_type>               value_type;
+  typedef ft::pair<const key_type, mapped_type>               value_type;
   typedef KeyCompare                                      key_compare;
   typedef ValueAlloc                                      allocator_type;
   typedef typename allocator_type::reference              reference;
@@ -108,14 +108,14 @@ class map {
   // MODIFIERS
 
   // Insert elements
-  pair<iterator, bool> insert(const value_type &val) {
-    pair<bst_node_type *, bool> insertResult = _tree.insert(val);
+  ft::pair<iterator, bool> insert(const value_type &val) {
+    ft::pair<bst_node_type *, bool> insertResult = _tree.insert(val);
     return ft::make_pair(iterator(insertResult.first), insertResult.second);
   }
 
   iterator insert(iterator position, const value_type &val) {
     (void)position;
-    pair<bst_node_type *, bool> insertResult = _tree->insert(val);
+    ft::pair<bst_node_type *, bool> insertResult = _tree->insert(val);
     return iterator(insertResult.first);
   }
 
@@ -194,10 +194,10 @@ class map {
     { return const_iterator(_tree.upper_bound(k)); }
 
   // Get range of equal elements
-  pair<const_iterator, const_iterator> equal_range(const key_type &k) const
-    { return pair<const_iterator, const_iterator>(_tree.equal_range(k)); }
-  pair<iterator, iterator> equal_range(const key_type &k)
-    { return pair<iterator, iterator>(_tree.equal_range(k)); }
+  ft::pair<const_iterator, const_iterator> equal_range(const key_type &k) const
+    { return ft::pair<const_iterator, const_iterator>(_tree.equal_range(k)); }
+  ft::pair<iterator, iterator> equal_range(const key_type &k)
+    { return ft::pair<iterator, iterator>(_tree.equal_range(k)); }
 
 
   // ALLOCATOR
@@ -335,7 +335,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
 
   typedef KeyType key_type;
   typedef MappedType mapped_type;
-  typedef pair<const key_type, mapped_type> value_type;
+  typedef ft::pair<const key_type, mapped_type> value_type;
   typedef KeyCompare key_compare;
   typedef typename map::value_compare value_compare;
   typedef ValueAlloc value_allocator_type;
@@ -381,7 +381,7 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
 
   // MODIFIERS
 
-  pair<Node *, bool> insert(value_type const &new_val) {
+  ft::pair<Node *, bool> insert(value_type const &new_val) {
     _root = Node::insert(_root, new_val, *this);
     Node *lastAdded = _root->get_last_added();
     bool oneWasAdded = _root->get_one_was_added();
@@ -432,15 +432,15 @@ class map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST {
     return Node::upper_bound(_root, kVal);
   }
 
-  pair<Node const *, Node const *> equal_range(key_type const &k) const {
+  ft::pair<Node const *, Node const *> equal_range(key_type const &k) const {
     Node const *n = this->lower_bound(k);
     if (n->get_value()->first == k)
       return ft::make_pair(n, n->next());
     else
       return ft::make_pair(n, n);
   }
-  pair<Node *, Node *> equal_range(key_type const &k) {
-    pair<Node const *, Node const *> equal_range_const = \
+  ft::pair<Node *, Node *> equal_range(key_type const &k) {
+    ft::pair<Node const *, Node const *> equal_range_const = \
       const_cast<BST const *>(this)->equal_range(k);
     return ft::make_pair(const_cast<Node *>(equal_range_const.first),
                      const_cast<Node *>(equal_range_const.second));
@@ -825,7 +825,7 @@ struct map<KeyType, MappedType, KeyCompare, ValueAlloc>::BST::Node {
   static Node *deepcopy(Node const *p, Node *pCopyParent) {
     if (p == NULL)
       return (NULL);
-    Node *pCopy = new Node(*p->_value, p->_tree);
+    Node *pCopy = p->_tree.new_node(*p->_value);
     pCopy->_parent = pCopyParent;
     pCopy->_height = p->_height;
     pCopy->_left = deepcopy(p->_left, pCopy);
